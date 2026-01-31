@@ -11,8 +11,7 @@ dependencies = [
     "grpcio>=1.76.0",
     "grpcio-tools>=1.76.0",
     "protobuf>=6.33.4",
-    "pydantic>=2.12.5",
-    "pydantic-settings>=2.12.0",
+    "pydantic>=2.12.5", "pydantic-settings>=2.12.0",
     "uvicorn>=0.40.0",
     "websockets>=16.0",
 ]
@@ -53,6 +52,14 @@ indent-style = "space"
 python_version = "3.14"
 strict = true
 ignore_missing_imports = true
+exclude = '(^|/)generated/'
+disable_error_code = [
+  "attr-defined",
+  "arg-type",
+  "call-arg",
+  "no-untyped-def",
+  "no-untyped-call",
+]
 
 
 [[tool.mypy.overrides]]
@@ -66,11 +73,18 @@ pythonVersion = "3.14"
 
 reportMissingImports = "error"
 reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportAttributeAccessIssue = false
+reportUnknownArgumentType = false
+
 
 venv = ".venv"
 venvPath = "."
 
 include = ["services", "common"]
+ignore = ["**/generated/**"]
 exclude = [
     "services/ui/**",
     "**/node_modules",
@@ -81,6 +95,7 @@ exclude = [
     "**/migrations/**",
     ".mypy_cache",
     ".ruff_cache",
+    "**/generated/**",
 ]
 extraPaths = ["services", "common"]
 

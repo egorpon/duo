@@ -34,7 +34,7 @@ class Settings(BaseDuoSettings):
     debug: bool = Field(alias='duo_debug')
     secret_key: SecretStr = Field(alias='duo_secret_key')
 
-    db: DatabaseSettings = DatabaseSettings()  # type: ignore
+    db: DatabaseSettings = DatabaseSettings()  # pyright: ignore[reportCallIssue]
 
 
-settings = Settings()  # type: ignore
+settings = Settings()  # pyright: ignore[reportCallIssue]

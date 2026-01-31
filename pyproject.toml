@@ -25,12 +25,6 @@ dev = [
 ]
 
 
-[tool.mypy]
-python_version = "3.14"
-strict = true
-ignore_missing_imports = true
-
-
 [tool.ruff]
 line-length = 80
 exclude = [
@@ -41,6 +35,7 @@ exclude = [
     "**/migrations/**",
     ".mypy_cache",
     ".ruff_cache",
+    "generated",
 ]
 
 
@@ -52,6 +47,17 @@ fixable = ["ALL"]
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
+
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+ignore_missing_imports = true
+
+
+[[tool.mypy.overrides]]
+module = "generated.*"
+disallow_untyped_defs = false
 
 
 [tool.basedpyright]

@@ -1,3 +1,6 @@
+# generated proto services/messages
+generated/
+!generated/__init__.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package users;
+
+service UserService {
+  rpc UserCreate (UserCreateRequest) returns (JWT);
+  rpc UserLogin (UserLoginRequest) returns (JWT);
+  rpc GetUserData (JWT) returns (UserDisplay);
+}
+
+message UserDisplay {
+  int32 id = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message UserCreateRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message UserLoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message JWT {
+  string access_token = 1;
+  string token_type = 2;
+  float issued_at = 3;
+  float expired_at = 4;
+}
+

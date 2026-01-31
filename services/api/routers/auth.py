@@ -14,6 +14,7 @@ async def user_register(data: UserRegisterRequest) -> JsonWebToken:
         expired_at=12.1,
     )
 
+
 @router.post('/login/')
 async def user_login(data: UserRegisterRequest) -> JsonWebToken:
     return JsonWebToken(

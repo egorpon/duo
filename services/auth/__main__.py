@@ -2,7 +2,7 @@ import asyncio
 
 from grpc import aio
 
-from auth.client import UserService
+from auth.service import UserService
 from generated import auth_pb2_grpc
 
 

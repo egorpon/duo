@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import FastAPI, WebSocket
 
+from api.config import settings
 from api.routers.auth import router as auth_router
 from api.websockets import WebSocketsClient
 
@@ -14,6 +15,7 @@ client = WebSocketsClient()
 
 @app.get('/', tags=['status'])
 def main() -> dict[str, Any]:
+    print(settings)
     return {'message': 'ok'}
 
 

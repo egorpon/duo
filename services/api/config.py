@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, IPvAnyAddress, PostgresDsn, SecretStr, TypeAdapter
+from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_PATH = Path(__file__).parent
@@ -13,28 +13,9 @@ class BaseDuoSettings(BaseSettings):
     )
 
 
-class DatabaseSettings(BaseDuoSettings):
-    name: str = Field(alias='postgres_db')
-    host: IPvAnyAddress = Field(alias='postgres_host')
-    port: int = Field(alias='postgres_port')
-    user: str = Field(alias='postgres_user')
-    password: SecretStr = Field(alias='postgres_password')
-
-    @property
-    def dsn(self) -> PostgresDsn:
-        dsn_str = (
-            f'postgresql+psycopg2://'
-            f'{self.user}:{self.password.get_secret_value()}@'
-            f'{self.host}:{self.port}/{self.name}'
-        )
-        return TypeAdapter(PostgresDsn).validate_strings(dsn_str)
-
-
 class Settings(BaseDuoSettings):
-    debug: bool = Field(alias='duo_debug')
-    secret_key: SecretStr = Field(alias='duo_secret_key')
-
-    db: DatabaseSettings = DatabaseSettings()  # pyright: ignore[reportCallIssue]
+    debug: bool = Field(alias='duo_api_debug')
+    allowed_origins: list[AnyHttpUrl] = Field(alias='duo_allowed_origins')
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

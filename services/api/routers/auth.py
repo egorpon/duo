@@ -1,18 +1,19 @@
-import grpc
 from fastapi import APIRouter
+from grpc import aio
 
 from api.schemas.auth import JsonWebToken, UserRegisterRequest
 from generated import auth_pb2, auth_pb2_grpc
 
 router = APIRouter()
 
-channel = grpc.insecure_channel('localhost:50051')
+channel = aio.insecure_channel('localhost:50051')
+
 stub = auth_pb2_grpc.UserServiceStub(channel)
 
 
 @router.post('/register/')
 async def user_register(data: UserRegisterRequest) -> JsonWebToken:
-    resp = stub.UserCreate(
+    resp = await stub.UserCreate(
         auth_pb2.UserCreateRequest(
             email='email@email.com', password='strongpassword'
         )

@@ -13,7 +13,7 @@ from generated.auth_pb2 import (
 
 class UserService(auth_pb2_grpc.UserServiceServicer):
     @override
-    def UserCreate(
+    async def UserCreate(
         self, request: UserCreateRequest, context: ServicerContext
     ) -> JWT:
         print('UserCreate', request, context)
@@ -25,7 +25,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         )
 
     @override
-    def UserLogin(
+    async def UserLogin(
         self, request: UserLoginRequest, context: ServicerContext
     ) -> JWT:
         return JWT(
@@ -36,7 +36,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         )
 
     @override
-    def GetUserData(
+    async def GetUserData(
         self, request: JWT, context: ServicerContext
     ) -> UserDisplay:
         return UserDisplay(

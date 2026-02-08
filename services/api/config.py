@@ -6,16 +6,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_PATH = Path(__file__).parent
 
 
-class BaseDuoSettings(BaseSettings):
+class ApiSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=BASE_PATH / '.env',
         extra='ignore',
     )
-
-
-class Settings(BaseDuoSettings):
     debug: bool = Field(alias='duo_api_debug')
     allowed_origins: list[AnyHttpUrl] = Field(alias='duo_allowed_origins')
 
 
-settings = Settings()  # pyright: ignore[reportCallIssue]
+settings = ApiSettings()  # pyright: ignore[reportCallIssue]

@@ -1,0 +1,4 @@
+name: 'duo'
+include:
+  - ./services/auth/infra.yaml
+

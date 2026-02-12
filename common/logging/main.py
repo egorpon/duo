@@ -6,7 +6,7 @@ from typing import Any
 
 
 def get_logging_config(
-    filepath: Path = Path('./config.json'),
+    filepath: Path = Path('common/logging/config.json'),
 ) -> dict[str, Any]:
     with open(filepath, 'r') as f:
         result: dict[str, Any] = json.load(f)

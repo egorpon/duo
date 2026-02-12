@@ -1,9 +1,16 @@
 import asyncio
+import logging
+import signal
 
 from grpc import aio
 
 from auth.service import UserService
+from common.logging.main import setup_logging
 from generated import auth_pb2_grpc
+
+setup_logging()
+
+logger = logging.getLogger('duo.auth')
 
 
 async def serve() -> None:
@@ -11,9 +18,24 @@ async def serve() -> None:
     auth_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
 
     port = server.add_insecure_port('localhost:50051')
-    print('running server on port:', port)
     await server.start()
-    await server.wait_for_termination()
+    logger.info('running server on port: %s', port)
+
+    stop_event = asyncio.Event()
+
+    def handle_signal():
+        logger.info('Shutdown signal received')
+        stop_event.set()
+
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGTERM, handle_signal)
+    loop.add_signal_handler(signal.SIGINT, handle_signal)
+
+    await stop_event.wait()
+
+    logger.info('Shutting down gracefully')
+    await server.stop(grace=5)
+    logger.info('Shutdown complete')
 
 
 if __name__ == '__main__':

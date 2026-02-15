@@ -17,11 +17,23 @@ api:
 auth:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.auth
 
-
 ui:
 	cd ./services/ui/; npm run dev
 
 
 generate-proto:
-	./.venv/bin/python -m grpc_tools.protoc -I proto --python_out=generated --grpc_python_out=generated proto/*.proto
+	./.venv/bin/python \
+		-m grpc_tools.protoc \
+		-I proto \
+		--python_out=generated \
+		--grpc_python_out=generated \
+		proto/*.proto
 
+
+auth-make-migrations:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+		-c ./services/auth/alembic.ini revision --autogenerate
+
+auth-apply-migrations:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+		-c ./services/auth/alembic.ini upgrade head 

@@ -5,8 +5,8 @@ from sqlmodel import Field, SQLModel
 
 
 class TimeStampedModel(SQLModel):
-    created_at: datetime = Field(default=datetime.now)
-    updated_at: datetime = Field(default=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 
 class User(TimeStampedModel, table=True):

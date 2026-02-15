@@ -17,19 +17,18 @@ class AuthSettings(BaseSettings):
 
     db_host: str = Field(alias='postgres_host')
     db_port: str = Field(alias='postgres_port')
-    db_name: str = Field(alias='postgres_name')
+    db_name: str = Field(alias='postgres_db')
     db_user: str = Field(alias='postgres_user')
     db_pass: SecretStr = Field(alias='postgres_password')
 
     @property
-    def dsn(self) -> PostgresDsn:
+    def db_dsn(self) -> PostgresDsn:
         dsn_str = (
             f'postgresql+asyncpg://'
             f'{self.db_user}:{self.db_pass.get_secret_value()}@'
             f'{self.db_host}:{self.db_port}/{self.db_name}'
         )
         return TypeAdapter(PostgresDsn).validate_strings(dsn_str)
-
 
 
 settings = AuthSettings()  # pyright: ignore[reportCallIssue]

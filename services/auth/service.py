@@ -2,7 +2,7 @@ from typing import override
 
 from grpc import ServicerContext
 
-from auth.main import user_create
+from auth.queries import user_create
 from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (

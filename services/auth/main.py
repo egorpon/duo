@@ -8,18 +8,14 @@ from auth.password import hash_password
 
 async def get_user_by_id(id: int) -> User | None:
     async with get_async_session() as session:
-        result = await session.exec(
-            select(User).where(User.id == id)
-        )
+        result = await session.exec(select(User).where(User.id == id))
         user = result.first()
         return user
 
 
 async def get_user_by_email(email: EmailStr) -> User | None:
     async with get_async_session() as session:
-        result = await session.exec(
-            select(User).where(User.email == email)
-        )
+        result = await session.exec(select(User).where(User.email == email))
         user = result.first()
         return user
 

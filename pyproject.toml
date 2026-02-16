@@ -37,7 +37,7 @@ exclude = [
     ".venv",
     ".vscode",
     ".pytest_cache",
-    "**/migrations/**",
+    "**/alembic/**",
     ".mypy_cache",
     ".ruff_cache",
     "generated",

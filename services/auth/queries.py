@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import EmailStr
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -6,6 +8,7 @@ from auth.db import get_async_session
 from auth.exceptions import EmailAlreadyUsedError
 from auth.models import User
 from auth.password import hash_password
+from common.models import model_update
 
 
 async def get_user_by_id(
@@ -41,9 +44,9 @@ async def user_create(
     email: EmailStr,
     password: str,
 ) -> User:
-    '''
+    """
     raises `EmailAlreadyUsedError`
-    '''
+    """
     other_user = await get_user_by_email(session=session, email=email)
     if other_user:
         raise EmailAlreadyUsedError(
@@ -56,6 +59,26 @@ async def user_create(
     async with session as s:
         hashed_password = hash_password(password)
         user = User(email=email, hashed_password=hashed_password)
+        s.add(user)
+        await s.commit()
+        await s.refresh(user)
+        return user
+
+
+async def user_update(
+    *,
+    user: User,
+    session: AsyncSession | None = None,
+    **fields: Any,
+) -> User:
+    if not session:
+        session = get_async_session()
+
+    user, updates = model_update(model=user, **fields)
+    if not updates:
+        return user
+
+    async with session as s:
         s.add(user)
         await s.commit()
         await s.refresh(user)

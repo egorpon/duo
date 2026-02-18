@@ -1,33 +1,51 @@
 syntax = "proto3";
 
-package users;
+package users.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 service UserService {
-  rpc UserCreate (UserCreateRequest) returns (JWT);
-  rpc UserLogin (UserLoginRequest) returns (JWT);
-  rpc GetUserData (JWT) returns (UserDisplay);
+  rpc CreateUser (CreateUserRequest) returns (AuthResponse);
+  rpc LoginUser (LoginUserRequest) returns (AuthResponse);
+  rpc UpdateUserEmail (UpdateUserEmailRequest) returns (User);
+  rpc UpdateUserPassword (UpdateUserPasswordRequest) returns (AuthResponse);
+
+  rpc GetCurrentUser (google.protobuf.Empty) returns (User);
+  rpc GetUserById (GetUserByIdRequest) returns (User);
 }
 
-message UserDisplay {
+message User {
   int32 id = 1;
   string email = 2;
-  string name = 3;
+  google.protobuf.Timestamp created_at = 100;
+  google.protobuf.Timestamp updated_at = 101;
 }
 
-message UserCreateRequest {
+message UpdateUserEmailRequest {
+  string new_email = 1;
+}
+
+message UpdateUserPasswordRequest {
+  string new_password = 1;
+}
+
+message CreateUserRequest {
   string email = 1;
   string password = 2;
 }
 
-message UserLoginRequest {
+message LoginUserRequest {
   string email = 1;
   string password = 2;
 }
 
-message JWT {
+message AuthResponse {
   string access_token = 1;
-  string token_type = 2;
-  float issued_at = 3;
-  float expired_at = 4;
+  string refresh_token = 2;
+  google.protobuf.Timestamp expires_at = 3;
 }
 
+message GetUserByIdRequest {
+  int32 id = 1;
+}

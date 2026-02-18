@@ -1,10 +1,11 @@
 from typing import Any
 
 from pydantic import EmailStr
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from auth.db import get_async_session
+from auth.db import get_session_ctx
 from auth.exceptions import EmailAlreadyUsedError
 from auth.models import User
 from auth.password import hash_password
@@ -16,9 +17,7 @@ async def get_user_by_id(
     *,
     id: int,
 ) -> User | None:
-    if not session:
-        session = get_async_session()
-    async with session as s:
+    async with get_session_ctx(session=session) as s:
         result = await s.exec(select(User).where(User.id == id))
         user = result.first()
         return user
@@ -29,10 +28,7 @@ async def get_user_by_email(
     *,
     email: EmailStr,
 ) -> User | None:
-    if not session:
-        session = get_async_session()
-
-    async with session as s:
+    async with get_session_ctx(session=session) as s:
         result = await s.exec(select(User).where(User.email == email))
         user = result.first()
         return user
@@ -53,16 +49,18 @@ async def user_create(
             f'Could not create user with email {email}. Already in use'
         )
 
-    if not session:
-        session = get_async_session()
-
-    async with session as s:
-        hashed_password = hash_password(password)
-        user = User(email=email, hashed_password=hashed_password)
-        s.add(user)
-        await s.commit()
-        await s.refresh(user)
-        return user
+    try:
+        async with get_session_ctx(session=session) as s:
+            hashed_password = hash_password(password)
+            user = User(email=email, hashed_password=hashed_password)
+            s.add(user)
+            await s.commit()
+            await s.refresh(user)
+            return user
+    except IntegrityError as exc:
+        raise EmailAlreadyUsedError(
+            f'Could not create user with email {email}. Already in use'
+        ) from exc
 
 
 async def user_update(
@@ -71,15 +69,17 @@ async def user_update(
     session: AsyncSession | None = None,
     **fields: Any,
 ) -> User:
-    if not session:
-        session = get_async_session()
-
     user, updates = model_update(model=user, **fields)
     if not updates:
         return user
 
-    async with session as s:
-        s.add(user)
-        await s.commit()
-        await s.refresh(user)
-        return user
+    try:
+        async with get_session_ctx(session=session) as s:
+            s.add(user)
+            await s.commit()
+            await s.refresh(user)
+            return user
+    except IntegrityError as exc:
+        raise EmailAlreadyUsedError(
+            'User with this email already exists'
+        ) from exc

@@ -2,48 +2,45 @@ from typing import override
 
 from grpc import ServicerContext
 
-from auth.queries import user_create
-from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
-    JWT,
-    UserCreateRequest,
-    UserDisplay,
-    UserLoginRequest,
+    AuthResponse,
+    CreateUserRequest,
+    GetUserByIdRequest,
+    LoginUserRequest,
+    UpdateUserEmailRequest,
+    UpdateUserPasswordRequest,
+    User,
 )
 
 
 class UserService(auth_pb2_grpc.UserServiceServicer):
     @override
-    async def UserCreate(
-        self, request: UserCreateRequest, context: ServicerContext
-    ) -> JWT:
-        user = await user_create(email=request.email, password=request.password)
-        token = issue_token(user)
-        return JWT(
-            access_token=token.access_token,
-            token_type=token.token_type,
-            issued_at=token.issued_at,
-            expired_at=token.expired_at,
-        )
+    def CreateUser(
+        self, request: CreateUserRequest, context: ServicerContext
+    ) -> AuthResponse: ...
 
     @override
-    async def UserLogin(
-        self, request: UserLoginRequest, context: ServicerContext
-    ) -> JWT:
-        return JWT(
-            access_token='TokenLogin',
-            token_type='Bearer',
-            issued_at=1.1,
-            expired_at=1.1,
-        )
+    def LoginUser(
+        self, request: LoginUserRequest, context: ServicerContext
+    ) -> AuthResponse: ...
 
     @override
-    async def GetUserData(
-        self, request: JWT, context: ServicerContext
-    ) -> UserDisplay:
-        return UserDisplay(
-            id=1,
-            email='test@example.com',
-            name='nickname',
-        )
+    def UpdateUserEmail(
+        self, request: UpdateUserEmailRequest, context: ServicerContext
+    ) -> User: ...
+
+    @override
+    def UpdateUserPassword(
+        self, request: UpdateUserPasswordRequest, context: ServicerContext
+    ) -> AuthResponse: ...
+
+    @override
+    def GetCurrentUser(
+        self, request: None, context: ServicerContext
+    ) -> User: ...
+
+    @override
+    def GetUserById(
+        self, request: GetUserByIdRequest, context: ServicerContext
+    ) -> User: ...

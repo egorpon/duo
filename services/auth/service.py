@@ -2,6 +2,9 @@ from typing import override
 
 from grpc import ServicerContext
 
+from auth.password import check_password
+from auth.queries import get_user_by_email, user_create
+from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
     AuthResponse,
@@ -16,31 +19,61 @@ from generated.auth_pb2 import (
 
 class UserService(auth_pb2_grpc.UserServiceServicer):
     @override
-    def CreateUser(
+    async def CreateUser(
         self, request: CreateUserRequest, context: ServicerContext
-    ) -> AuthResponse: ...
+    ) -> AuthResponse:
+        user = await user_create(email=request.email, password=request.email)
+        token = issue_token(user=user)
+        return AuthResponse(
+            access_token=token.access_token,
+            expires_at=token.expired_at,
+            issued_at=token.issued_at,
+        )
 
     @override
-    def LoginUser(
+    async def LoginUser(
         self, request: LoginUserRequest, context: ServicerContext
-    ) -> AuthResponse: ...
+    ) -> AuthResponse:
+        user = await get_user_by_email(email=request.email)
+        if not user:
+            # TODO: handle error appropriately
+            return AuthResponse(
+                access_token='',
+                expires_at=0,
+                issued_at=0,
+            )
+
+        if not check_password(request.password, user.hashed_password):
+            # TODO: handle error appropriately
+            return AuthResponse(
+                access_token='',
+                expires_at=0,
+                issued_at=0,
+            )
+
+        token = issue_token(user=user)
+        return AuthResponse(
+            access_token=token.access_token,
+            expires_at=token.expired_at,
+            issued_at=token.issued_at,
+        )
 
     @override
-    def UpdateUserEmail(
+    async def UpdateUserEmail(
         self, request: UpdateUserEmailRequest, context: ServicerContext
     ) -> User: ...
 
     @override
-    def UpdateUserPassword(
+    async def UpdateUserPassword(
         self, request: UpdateUserPasswordRequest, context: ServicerContext
     ) -> AuthResponse: ...
 
     @override
-    def GetCurrentUser(
+    async def GetCurrentUser(
         self, request: None, context: ServicerContext
     ) -> User: ...
 
     @override
-    def GetUserById(
+    async def GetUserById(
         self, request: GetUserByIdRequest, context: ServicerContext
     ) -> User: ...

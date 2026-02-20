@@ -41,9 +41,11 @@ message LoginUserRequest {
 }
 
 message AuthResponse {
+  reserved 2;
   string access_token = 1;
-  string refresh_token = 2;
-  google.protobuf.Timestamp expires_at = 3;
+  // string refresh_token = 2;
+  google.protobuf.Timestamp expires_at = 10;
+  google.protobuf.Timestamp issued_at = 11;
 }
 
 message GetUserByIdRequest {

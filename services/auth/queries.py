@@ -20,7 +20,7 @@ async def get_user_by_id(
     async with get_session_ctx(session=session) as s:
         result = await s.exec(select(User).where(User.id == id))
         user = result.first()
-        return user
+        return user  # type: ignore[no-any-return]
 
 
 async def get_user_by_email(
@@ -31,7 +31,7 @@ async def get_user_by_email(
     async with get_session_ctx(session=session) as s:
         result = await s.exec(select(User).where(User.email == email))
         user = result.first()
-        return user
+        return user  # type: ignore[no-any-return]
 
 
 async def user_create(

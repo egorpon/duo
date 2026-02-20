@@ -14,14 +14,16 @@ ISSUER = 'duo'
 class Token(BaseModel):
     access_token: str
     token_type: str
-    issued_at: float
-    expired_at: float
+    issued_at: int
+    expired_at: int
 
 
 def issue_token(user: User) -> Token:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
-    exp = (now + datetime.timedelta(seconds=settings.jwt_lifetime)).timestamp()
-    iat = now.timestamp()
+    exp = int(
+        (now + datetime.timedelta(seconds=settings.jwt_lifetime)).timestamp()
+    )
+    iat = int(now.timestamp())
     payload = {
         'sub': user.id,
         'iat': iat,

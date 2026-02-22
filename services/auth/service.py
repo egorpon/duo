@@ -1,8 +1,8 @@
-from datetime import datetime
 from typing import override
 
-from grpc import ServicerContext
+from grpc import ServicerContext, StatusCode
 
+from auth.exceptions import EmailAlreadyUsedError
 from auth.password import check_password
 from auth.queries import get_user_by_email, user_create
 from auth.token import issue_token
@@ -23,7 +23,15 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     async def CreateUser(
         self, request: CreateUserRequest, context: ServicerContext
     ) -> AuthResponse:
-        user = await user_create(email=request.email, password=request.email)
+        try:
+            user = await user_create(
+                email=request.email, password=request.email
+            )
+        except EmailAlreadyUsedError:
+            await context.abort(  # pyright: ignore
+                code=StatusCode.ALREADY_EXISTS, details='Email already used'
+            )
+
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
@@ -36,21 +44,16 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         self, request: LoginUserRequest, context: ServicerContext
     ) -> AuthResponse:
         user = await get_user_by_email(email=request.email)
-        now = datetime.now()
         if not user:
-            # TODO: handle error appropriately
-            return AuthResponse(
-                access_token='x',
-                expires_at=now,
-                issued_at=now,
+            await context.abort(  # pyright: ignore
+                code=StatusCode.NOT_FOUND,
+                details='User not found',
             )
 
         if not check_password(request.password, user.hashed_password):
-            # TODO: handle error appropriately
-            return AuthResponse(
-                access_token='',
-                expires_at=now,
-                issued_at=now,
+            await context.abort(  # pyright: ignore
+                code=StatusCode.INVALID_ARGUMENT,
+                details='Invalid password',
             )
 
         token = issue_token(user=user)

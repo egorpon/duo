@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from http import HTTPStatus
+
+from fastapi import APIRouter, HTTPException
 from grpc import aio
 
 from api.schemas.auth import JsonWebToken, UserRegisterRequest
@@ -12,19 +14,25 @@ stub = auth_pb2_grpc.UserServiceStub(channel)
 
 @router.post('/register/')
 async def user_register(data: UserRegisterRequest) -> JsonWebToken:
-    resp = await stub.CreateUser(
-        auth_pb2.CreateUserRequest(
-            email=data.email,
-            password=data.password.get_secret_value(),
-        ),
-        timeout=2,
-    )
-    return JsonWebToken(
-        access_token=resp.access_token,
-        token_type='Bearer',
-        issued_at=resp.issued_at.ToDatetime().timestamp(),
-        expires_at=resp.expires_at.ToDatetime().timestamp(),
-    )
+    try:
+        resp = await stub.CreateUser(
+            auth_pb2.CreateUserRequest(
+                email=data.email,
+                password=data.password.get_secret_value(),
+            ),
+            timeout=2,
+        )
+        return JsonWebToken(
+            access_token=resp.access_token,
+            token_type='Bearer',
+            issued_at=resp.issued_at.ToDatetime().timestamp(),
+            expires_at=resp.expires_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        print(exc.code, exc.details)
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
+        )
 
 
 @router.post('/login/')

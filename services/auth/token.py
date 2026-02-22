@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
@@ -14,20 +14,17 @@ ISSUER = 'duo'
 class Token(BaseModel):
     access_token: str
     token_type: str
-    issued_at: int
-    expired_at: int
+    issued_at: datetime
+    expires_at: datetime
 
 
 def issue_token(user: User) -> Token:
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
-    exp = int(
-        (now + datetime.timedelta(seconds=settings.jwt_lifetime)).timestamp()
-    )
-    iat = int(now.timestamp())
+    now = datetime.now(tz=timezone.utc)
+    exp = now + timedelta(seconds=settings.jwt_lifetime)
     payload = {
         'sub': user.id,
-        'iat': iat,
-        'exp': exp,
+        'iat': int(now.timestamp()),
+        'exp': int(exp.timestamp()),
         'iss': ISSUER,
         'hash': user.hashed_password,
     }
@@ -40,8 +37,8 @@ def issue_token(user: User) -> Token:
     return Token(
         access_token=key,
         token_type='Bearer',
-        issued_at=iat,
-        expired_at=exp,
+        issued_at=now,
+        expires_at=exp,
     )
 
 

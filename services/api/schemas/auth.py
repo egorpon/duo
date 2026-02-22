@@ -15,4 +15,4 @@ class JsonWebToken(BaseModel):
     access_token: str
     token_type: str
     issued_at: float
-    expired_at: float
+    expires_at: float

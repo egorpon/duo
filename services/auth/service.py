@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import override
 
 from grpc import ServicerContext
@@ -26,7 +27,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=token.expired_at,
+            expires_at=token.expires_at,
             issued_at=token.issued_at,
         )
 
@@ -35,26 +36,27 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         self, request: LoginUserRequest, context: ServicerContext
     ) -> AuthResponse:
         user = await get_user_by_email(email=request.email)
+        now = datetime.now()
         if not user:
             # TODO: handle error appropriately
             return AuthResponse(
-                access_token='',
-                expires_at=0,
-                issued_at=0,
+                access_token='x',
+                expires_at=now,
+                issued_at=now,
             )
 
         if not check_password(request.password, user.hashed_password):
             # TODO: handle error appropriately
             return AuthResponse(
                 access_token='',
-                expires_at=0,
-                issued_at=0,
+                expires_at=now,
+                issued_at=now,
             )
 
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=token.expired_at,
+            expires_at=token.expires_at,
             issued_at=token.issued_at,
         )
 

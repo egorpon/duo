@@ -12,25 +12,33 @@ stub = auth_pb2_grpc.UserServiceStub(channel)
 
 @router.post('/register/')
 async def user_register(data: UserRegisterRequest) -> JsonWebToken:
-    resp = await stub.UserCreate(
-        auth_pb2.UserCreateRequest(
-            email=data.email, password=data.password.get_secret_value()
+    resp = await stub.CreateUser(
+        auth_pb2.CreateUserRequest(
+            email=data.email,
+            password=data.password.get_secret_value(),
         ),
         timeout=2,
     )
     return JsonWebToken(
         access_token=resp.access_token,
-        token_type=resp.token_type,
-        issued_at=resp.issued_at,
-        expired_at=resp.expired_at,
+        token_type='Bearer',
+        issued_at=resp.issued_at.ToDatetime().timestamp(),
+        expires_at=resp.expires_at.ToDatetime().timestamp(),
     )
 
 
 @router.post('/login/')
 async def user_login(data: UserRegisterRequest) -> JsonWebToken:
+    resp = await stub.LoginUser(
+        auth_pb2.LoginUserRequest(
+            email=data.email,
+            password=data.password.get_secret_value(),
+        ),
+        timeout=2,
+    )
     return JsonWebToken(
-        access_token='token' + data.email,
+        access_token=resp.access_token,
         token_type='Bearer',
-        issued_at=123.1,
-        expired_at=12.1,
+        issued_at=resp.issued_at.ToDatetime().timestamp(),
+        expires_at=resp.expires_at.ToDatetime().timestamp(),
     )

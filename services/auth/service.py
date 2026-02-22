@@ -44,11 +44,12 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         self, request: LoginUserRequest, context: ServicerContext
     ) -> AuthResponse:
         user = await get_user_by_email(email=request.email)
-        if not user:
+        if user is None:
             await context.abort(  # pyright: ignore
                 code=StatusCode.NOT_FOUND,
                 details='User not found',
             )
+            return  # for mypy
 
         if not check_password(request.password, user.hashed_password):
             await context.abort(  # pyright: ignore

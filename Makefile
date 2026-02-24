@@ -2,20 +2,22 @@
 PYTHONPATH_SERVICES=services:generated
 
 type-check:
-	.venv/bin/basedpyright
-	.venv/bin/mypy .
+	./.venv/bin/basedpyright
+	./.venv/bin/mypy .
 
 
 format:
-	.venv/bin/ruff format
-	.venv/bin/ruff check --fix
+	./.venv/bin/ruff format
+	./.venv/bin/ruff check --fix
 
 
 api:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.api
 
+
 auth:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.auth
+
 
 ui:
 	cd ./services/ui/; npm run dev
@@ -34,6 +36,12 @@ auth-make-migrations:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
 		-c ./services/auth/alembic.ini revision --autogenerate
 
+
 auth-apply-migrations:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
 		-c ./services/auth/alembic.ini upgrade head 
+
+
+auth-connect-to-db:
+	docker compose exec -it postgres psql -U duo_auth -d duo_auth
+

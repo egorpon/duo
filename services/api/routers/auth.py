@@ -29,7 +29,6 @@ async def user_register(data: UserRegisterRequest) -> JsonWebToken:
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        print(exc.code, exc.details)
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
         )
@@ -37,16 +36,21 @@ async def user_register(data: UserRegisterRequest) -> JsonWebToken:
 
 @router.post('/login/')
 async def user_login(data: UserRegisterRequest) -> JsonWebToken:
-    resp = await stub.LoginUser(
-        auth_pb2.LoginUserRequest(
-            email=data.email,
-            password=data.password.get_secret_value(),
-        ),
-        timeout=2,
-    )
-    return JsonWebToken(
-        access_token=resp.access_token,
-        token_type='Bearer',
-        issued_at=resp.issued_at.ToDatetime().timestamp(),
-        expires_at=resp.expires_at.ToDatetime().timestamp(),
-    )
+    try:
+        resp = await stub.LoginUser(
+            auth_pb2.LoginUserRequest(
+                email=data.email,
+                password=data.password.get_secret_value(),
+            ),
+            timeout=2,
+        )
+        return JsonWebToken(
+            access_token=resp.access_token,
+            token_type='Bearer',
+            issued_at=resp.issued_at.ToDatetime().timestamp(),
+            expires_at=resp.expires_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
+        )

@@ -4,7 +4,7 @@ from grpc import ServicerContext, StatusCode
 
 from auth.exceptions import EmailAlreadyUsedError
 from auth.password import check_password
-from auth.queries import get_user_by_email, user_create
+from auth.queries import get_user_by_email, get_user_by_id, user_create
 from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
@@ -82,4 +82,17 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     @override
     async def GetUserById(
         self, request: GetUserByIdRequest, context: ServicerContext
-    ) -> User: ...
+    ) -> User:
+        user = await get_user_by_id(id=request.id)
+        if user is None:
+            await context.abort(  # pyright: ignore
+                code=StatusCode.NOT_FOUND,
+                details='User not found',
+            )
+            return  # for mypy
+        return User(
+            id=user.id,
+            email=user.email,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )

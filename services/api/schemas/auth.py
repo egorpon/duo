@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr, SecretStr
 
 
@@ -16,3 +18,10 @@ class JsonWebToken(BaseModel):
     token_type: str
     issued_at: float
     expires_at: float
+
+
+class UserDisplay(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    updated_at: datetime

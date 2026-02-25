@@ -13,20 +13,20 @@ def custom_openapi():
         return app.openapi_schema
 
     openapi_schema = get_openapi(
-        title="Duo API",
-        version="1.0",
+        title='Duo API',
+        version='1.0',
         routes=app.routes,
     )
 
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
+    openapi_schema['components']['securitySchemes'] = {
+        'BearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
         }
     }
 
-    openapi_schema["security"] = [{"BearerAuth": []}]
+    openapi_schema['security'] = [{'BearerAuth': []}]
 
     app.openapi_schema = openapi_schema
     return app.openapi_schema

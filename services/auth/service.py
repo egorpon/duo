@@ -1,6 +1,6 @@
-from typing import override
+from typing import Any, override
 
-from grpc import ServicerContext, StatusCode
+from grpc.aio import ServicerContext, StatusCode
 
 from auth.exceptions import EmailAlreadyUsedError
 from auth.password import check_password
@@ -21,14 +21,16 @@ from generated.auth_pb2 import (
 class UserService(auth_pb2_grpc.UserServiceServicer):
     @override
     async def CreateUser(
-        self, request: CreateUserRequest, context: ServicerContext
+        self,
+        request: CreateUserRequest,
+        context: ServicerContext[Any, Any],
     ) -> AuthResponse:
         try:
             user = await user_create(
                 email=request.email, password=request.email
             )
         except EmailAlreadyUsedError:
-            await context.abort(  # pyright: ignore
+            await context.abort(
                 code=StatusCode.ALREADY_EXISTS, details='Email already used'
             )
 
@@ -41,18 +43,17 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
 
     @override
     async def LoginUser(
-        self, request: LoginUserRequest, context: ServicerContext
+        self, request: LoginUserRequest, context: ServicerContext[Any, Any]
     ) -> AuthResponse:
         user = await get_user_by_email(email=request.email)
         if user is None:
-            await context.abort(  # pyright: ignore
+            await context.abort(
                 code=StatusCode.NOT_FOUND,
                 details='User not found',
             )
-            return  # for mypy
 
         if not check_password(request.password, user.hashed_password):
-            await context.abort(  # pyright: ignore
+            await context.abort(  
                 code=StatusCode.INVALID_ARGUMENT,
                 details='Invalid password',
             )
@@ -66,30 +67,34 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
 
     @override
     async def UpdateUserEmail(
-        self, request: UpdateUserEmailRequest, context: ServicerContext
+        self,
+        request: UpdateUserEmailRequest,
+        context: ServicerContext[Any, Any],
     ) -> User: ...
 
     @override
     async def UpdateUserPassword(
-        self, request: UpdateUserPasswordRequest, context: ServicerContext
+        self,
+        request: UpdateUserPasswordRequest,
+        context: ServicerContext[Any, Any],
     ) -> AuthResponse: ...
 
     @override
     async def GetCurrentUser(
-        self, request: None, context: ServicerContext
+        self, request: None, context: ServicerContext[Any, Any]
     ) -> User: ...
 
     @override
     async def GetUserById(
-        self, request: GetUserByIdRequest, context: ServicerContext
+        self, request: GetUserByIdRequest, context: ServicerContext[Any, Any]
     ) -> User:
         user = await get_user_by_id(id=request.id)
         if user is None:
-            await context.abort(  # pyright: ignore
+            await context.abort(  
                 code=StatusCode.NOT_FOUND,
                 details='User not found',
             )
-            return  # for mypy
+
         return User(
             id=user.id,
             email=user.email,

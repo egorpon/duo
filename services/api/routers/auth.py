@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from grpc import aio
 
 from api.schemas.auth import JsonWebToken, UserDisplay, UserRegisterRequest
@@ -10,6 +11,9 @@ router = APIRouter()
 
 channel = aio.insecure_channel('localhost:50051')
 stub = auth_pb2_grpc.UserServiceStub(channel)
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 @router.post('/register/')
@@ -57,13 +61,16 @@ async def user_login(data: UserRegisterRequest) -> JsonWebToken:
 
 
 @router.get('/user/{user_id}/')
-async def user_detail(user_id: int) -> UserDisplay:
+async def user_detail(
+    user_id: int, token: str = Depends(oauth2_scheme)
+) -> UserDisplay:
     try:
         resp = await stub.GetUserById(
             auth_pb2.GetUserByIdRequest(
                 id=user_id,
             ),
             timeout=2,
+            metadata=(('authorization', token),),
         )
         return UserDisplay(
             id=resp.id,

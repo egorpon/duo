@@ -33,7 +33,7 @@ def custom_openapi():
 
 
 app = FastAPI()
-app.openapi = custom_openapi
+app.openapi = custom_openapi  # type: ignore
 app.include_router(auth_router, prefix='/auth', tags=['auth'])
 
 

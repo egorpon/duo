@@ -1,6 +1,7 @@
 from typing import Any, override
 
-from grpc.aio import ServicerContext, StatusCode
+from grpc import StatusCode
+from grpc.aio import ServicerContext
 
 from auth.exceptions import EmailAlreadyUsedError
 from auth.password import check_password
@@ -52,8 +53,9 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='User not found',
             )
 
+        assert user is not None
         if not check_password(request.password, user.hashed_password):
-            await context.abort(  
+            await context.abort(
                 code=StatusCode.INVALID_ARGUMENT,
                 details='Invalid password',
             )
@@ -90,11 +92,12 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     ) -> User:
         user = await get_user_by_id(id=request.id)
         if user is None:
-            await context.abort(  
+            await context.abort(
                 code=StatusCode.NOT_FOUND,
                 details='User not found',
             )
 
+        assert user is not None
         return User(
             id=user.id,
             email=user.email,

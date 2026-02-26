@@ -2,8 +2,16 @@ class AuthServiceError(Exception):
     """Base error class for Auth service exeptions"""
 
 
-class InvalidTokenError(AuthServiceError):
+class AuthenticationError(AuthServiceError):
+    """Base class for authentication errors"""
+
+
+class InvalidTokenError(AuthenticationError):
     """Raised when got invalid JWT"""
+
+
+class ExpiredTokenError(AuthenticationError):
+    """Raised when got expired JWT"""
 
 
 class DBError(AuthServiceError):

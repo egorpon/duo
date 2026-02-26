@@ -5,7 +5,7 @@ import jwt
 from pydantic import BaseModel
 
 from auth.config import settings
-from auth.exceptions import InvalidTokenError
+from auth.exceptions import ExpiredTokenError, InvalidTokenError
 from auth.models import User
 
 ISSUER = 'duo'
@@ -51,6 +51,6 @@ def decode_token(token: str) -> dict[str, Any]:
             algorithms=[settings.jwt.algorithm],
         )
     except jwt.ExpiredSignatureError:
-        raise InvalidTokenError('Token expired')
+        raise ExpiredTokenError('Token expired')
     except (jwt.PyJWTError, jwt.InvalidTokenError):
         raise InvalidTokenError('Invalid token')

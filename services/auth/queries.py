@@ -6,9 +6,14 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.db import get_session_ctx
-from auth.exceptions import EmailAlreadyUsedError
+from auth.exceptions import (
+    EmailAlreadyUsedError,
+    ExpiredTokenError,
+    InvalidTokenError,
+)
 from auth.models import User
 from auth.password import hash_password
+from auth.token import decode_token
 from common.models import model_update
 
 
@@ -32,6 +37,28 @@ async def get_user_by_email(
         result = await s.exec(select(User).where(User.email == email))
         user = result.first()
         return user  # type: ignore[no-any-return]
+
+
+async def get_user_from_token(
+    session: AsyncSession | None = None, *, token: str
+) -> User:
+    """
+    Get user from token or raise error
+
+    `auth.exceptions.InvalidTokenError`
+    `auth.exceptions.ExpiredTokenError`
+    """
+    decoded_token = decode_token(token=token)
+    async with get_session_ctx(session) as s:
+        user = await get_user_by_id(session=s, id=decoded_token.sub)
+        if not user:
+            raise InvalidTokenError(
+                'User specified as sub value does not exists'
+            )
+        if user.hashed_password != decoded_token.hash:
+            raise ExpiredTokenError('Password hash mismatch, token outdated')
+
+        return user
 
 
 async def user_create(

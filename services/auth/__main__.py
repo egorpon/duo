@@ -4,6 +4,7 @@ import signal
 
 from grpc import aio
 
+from auth.interceptors import AuthInterceptor
 from auth.service import UserService
 from common.logging.main import setup_logging
 from generated import auth_pb2_grpc
@@ -14,7 +15,8 @@ logger = logging.getLogger('duo.auth')
 
 
 async def serve() -> None:
-    server = aio.server()
+    interceptors = (AuthInterceptor(),)
+    server = aio.server(interceptors=interceptors)
     auth_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
 
     port = server.add_insecure_port('localhost:50051')

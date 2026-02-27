@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 import jwt
 from pydantic import BaseModel
@@ -18,13 +17,21 @@ class Token(BaseModel):
     expires_at: datetime
 
 
+class TokenDetails(BaseModel):
+    sub: int
+    iat: float
+    exp: float
+    iss: str
+    hash: str
+
+
 def issue_token(user: User) -> Token:
     now = datetime.now(tz=timezone.utc)
     exp = now + timedelta(seconds=settings.jwt_lifetime)
     payload = {
-        'sub': user.id,
-        'iat': int(now.timestamp()),
-        'exp': int(exp.timestamp()),
+        'sub': str(user.id),
+        'iat': now.timestamp(),
+        'exp': exp.timestamp(),
         'iss': ISSUER,
         'hash': user.hashed_password,
     }
@@ -42,14 +49,15 @@ def issue_token(user: User) -> Token:
     )
 
 
-def decode_token(token: str) -> dict[str, Any]:
+def decode_token(token: str) -> TokenDetails:
     try:
-        return jwt.decode(
+        result = jwt.decode(
             jwt=token,
-            key=settings.secret_key,
+            key=settings.secret_key.get_secret_value(),
             issuer=ISSUER,
-            algorithms=[settings.jwt.algorithm],
+            algorithms=[settings.jwt_algorithm],
         )
+        return TokenDetails(**result)
     except jwt.ExpiredSignatureError:
         raise ExpiredTokenError('Token expired')
     except (jwt.PyJWTError, jwt.InvalidTokenError):

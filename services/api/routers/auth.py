@@ -1,7 +1,8 @@
 from http import HTTPStatus
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from grpc import aio
 
 from api.schemas.auth import JsonWebToken, UserDisplay, UserRegisterRequest
@@ -13,7 +14,9 @@ channel = aio.insecure_channel('localhost:50051')
 stub = auth_pb2_grpc.UserServiceStub(channel)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
+security = HTTPBearer()
+
+Credentials = Annotated[HTTPAuthorizationCredentials, Depends(security)]
 
 
 @router.post('/register/')
@@ -61,16 +64,14 @@ async def user_login(data: UserRegisterRequest) -> JsonWebToken:
 
 
 @router.get('/user/{user_id}/')
-async def user_detail(
-    user_id: int, token: str = Depends(oauth2_scheme)
-) -> UserDisplay:
+async def user_detail(user_id: int, credentials: Credentials) -> UserDisplay:
     try:
         resp = await stub.GetUserById(
             auth_pb2.GetUserByIdRequest(
                 id=user_id,
             ),
             timeout=2,
-            metadata=(('authorization', token),),
+            metadata=(('authorization', credentials.credentials),),
         )
         return UserDisplay(
             id=resp.id,

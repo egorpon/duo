@@ -25,3 +25,11 @@ class UserDisplay(BaseModel):
     email: EmailStr
     created_at: datetime
     updated_at: datetime
+
+
+class UserUpdateEmailRequest(BaseModel):
+    email: EmailStr
+
+
+class UserUpdatePasswordRequest(BaseModel):
+    password: SecretStr

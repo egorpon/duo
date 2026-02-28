@@ -6,7 +6,13 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from google.protobuf.empty_pb2 import Empty
 from grpc import aio
 
-from api.schemas.auth import JsonWebToken, UserDisplay, UserRegisterRequest
+from api.schemas.auth import (
+    JsonWebToken,
+    UserDisplay,
+    UserRegisterRequest,
+    UserUpdateEmailRequest,
+    UserUpdatePasswordRequest,
+)
 from generated import auth_pb2, auth_pb2_grpc
 
 router = APIRouter()
@@ -99,6 +105,52 @@ async def user_me(credentials: Credentials) -> UserDisplay:
             email=resp.email,
             created_at=resp.created_at.ToDatetime().timestamp(),
             updated_at=resp.updated_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
+        )
+
+
+@router.post('user/update/email/')
+async def user_update_email(
+    credentials: Credentials, data: UserUpdateEmailRequest
+) -> UserDisplay:
+    try:
+        resp = await stub.UpdateUserEmail(
+            auth_pb2.UpdateUserEmailRequest(new_email=data.email),
+            timeout=2,
+            metadata=(('authorization', credentials.credentials),),
+        )
+        return UserDisplay(
+            id=resp.id,
+            email=resp.email,
+            created_at=resp.created_at.ToDatetime().timestamp(),
+            updated_at=resp.updated_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
+        )
+
+
+@router.post('user/update/password/')
+async def user_update_password(
+    credentials: Credentials, data: UserUpdatePasswordRequest
+) -> JsonWebToken:
+    try:
+        resp = await stub.UpdateUserPassword(
+            auth_pb2.UpdateUserPasswordRequest(
+                new_password=data.password.get_secret_value()
+            ),
+            timeout=2,
+            metadata=(('authorization', credentials.credentials),),
+        )
+        return JsonWebToken(
+            access_token=resp.access_token,
+            token_type='Bearer',
+            issued_at=resp.issued_at.ToDatetime().timestamp(),
+            expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
         raise HTTPException(

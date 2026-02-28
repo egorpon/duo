@@ -42,12 +42,9 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):  # type: ignore[misc]
             async def new_unary_unary(
                 request: Any, context: grpc.ServicerContext
             ):
-                ctx_token = request_user.set(user)
-                try:
-                    assert handler.unary_unary is not None
+                assert handler.unary_unary is not None
+                with request_user.set(user):
                     return await handler.unary_unary(request, context)
-                finally:
-                    request_user.reset(ctx_token)
 
             return grpc.unary_unary_rpc_method_handler(
                 new_unary_unary,

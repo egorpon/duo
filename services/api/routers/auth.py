@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from google.protobuf.empty_pb2 import Empty
 from grpc import aio
 
 from api.schemas.auth import JsonWebToken, UserDisplay, UserRegisterRequest
@@ -82,4 +83,24 @@ async def user_detail(user_id: int, credentials: Credentials) -> UserDisplay:
     except aio.AioRpcError as exc:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=exc.details()
+        )
+
+
+@router.get('user/me/')
+async def user_me(credentials: Credentials) -> UserDisplay:
+    try:
+        resp = await stub.GetCurrentUser(
+            Empty(),
+            timeout=2,
+            metadata=(('authorization', credentials.credentials),),
+        )
+        return UserDisplay(
+            id=resp.id,
+            email=resp.email,
+            created_at=resp.created_at.ToDatetime().timestamp(),
+            updated_at=resp.updated_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
         )

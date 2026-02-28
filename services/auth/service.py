@@ -1,9 +1,11 @@
 from typing import Any, override
 
+from google.protobuf.empty_pb2 import Empty
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
 from auth.exceptions import EmailAlreadyUsedError
+from auth.interceptors import get_current_user
 from auth.password import check_password
 from auth.queries import get_user_by_email, get_user_by_id, user_create
 from auth.token import issue_token
@@ -83,8 +85,22 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
 
     @override
     async def GetCurrentUser(
-        self, request: None, context: ServicerContext[Any, Any]
-    ) -> User: ...
+        self, request: Empty, context: ServicerContext[Any, Any]
+    ) -> User:
+        user = get_current_user()
+        if user is None:
+            await context.abort(
+                code=StatusCode.UNAUTHENTICATED,
+                details='Not authenticated',
+            )
+
+        assert user is not None
+        return User(
+            id=user.id,
+            email=user.email,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
     @override
     async def GetUserById(

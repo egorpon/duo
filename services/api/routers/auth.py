@@ -1,33 +1,23 @@
 from http import HTTPStatus
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from google.protobuf.empty_pb2 import Empty
+from fastapi import APIRouter, HTTPException
 from grpc import aio
 
+from api.dependencies import UserServiceDep
 from api.schemas.auth import (
     JsonWebToken,
-    UserDisplay,
     UserRegisterRequest,
-    UserUpdateEmailRequest,
-    UserUpdatePasswordRequest,
 )
-from generated import auth_pb2, auth_pb2_grpc
+from generated import auth_pb2
 
-router = APIRouter()
-
-channel = aio.insecure_channel('localhost:50051')
-stub = auth_pb2_grpc.UserServiceStub(channel)
-
-
-security = HTTPBearer()
-
-Credentials = Annotated[HTTPAuthorizationCredentials, Depends(security)]
+router = APIRouter(tags=['auth'])
 
 
 @router.post('/register/')
-async def user_register(data: UserRegisterRequest) -> JsonWebToken:
+async def user_register(
+    data: UserRegisterRequest,
+    stub: UserServiceDep,
+) -> JsonWebToken:
     try:
         resp = await stub.CreateUser(
             auth_pb2.CreateUserRequest(
@@ -49,7 +39,10 @@ async def user_register(data: UserRegisterRequest) -> JsonWebToken:
 
 
 @router.post('/login/')
-async def user_login(data: UserRegisterRequest) -> JsonWebToken:
+async def user_login(
+    data: UserRegisterRequest,
+    stub: UserServiceDep,
+) -> JsonWebToken:
     try:
         resp = await stub.LoginUser(
             auth_pb2.LoginUserRequest(
@@ -67,92 +60,4 @@ async def user_login(data: UserRegisterRequest) -> JsonWebToken:
     except aio.AioRpcError as exc:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
-        )
-
-
-@router.get('/user/{user_id}/')
-async def user_detail(user_id: int, credentials: Credentials) -> UserDisplay:
-    try:
-        resp = await stub.GetUserById(
-            auth_pb2.GetUserByIdRequest(
-                id=user_id,
-            ),
-            timeout=2,
-            metadata=(('authorization', credentials.credentials),),
-        )
-        return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
-        )
-    except aio.AioRpcError as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=exc.details()
-        )
-
-
-@router.get('user/me/')
-async def user_me(credentials: Credentials) -> UserDisplay:
-    try:
-        resp = await stub.GetCurrentUser(
-            Empty(),
-            timeout=2,
-            metadata=(('authorization', credentials.credentials),),
-        )
-        return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
-        )
-    except aio.AioRpcError as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
-        )
-
-
-@router.post('user/update/email/')
-async def user_update_email(
-    credentials: Credentials, data: UserUpdateEmailRequest
-) -> UserDisplay:
-    try:
-        resp = await stub.UpdateUserEmail(
-            auth_pb2.UpdateUserEmailRequest(new_email=data.email),
-            timeout=2,
-            metadata=(('authorization', credentials.credentials),),
-        )
-        return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
-        )
-    except aio.AioRpcError as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
-        )
-
-
-@router.post('user/update/password/')
-async def user_update_password(
-    credentials: Credentials, data: UserUpdatePasswordRequest
-) -> JsonWebToken:
-    try:
-        resp = await stub.UpdateUserPassword(
-            auth_pb2.UpdateUserPasswordRequest(
-                new_password=data.password.get_secret_value()
-            ),
-            timeout=2,
-            metadata=(('authorization', credentials.credentials),),
-        )
-        return JsonWebToken(
-            access_token=resp.access_token,
-            token_type='Bearer',
-            issued_at=resp.issued_at.ToDatetime().timestamp(),
-            expires_at=resp.expires_at.ToDatetime().timestamp(),
-        )
-    except aio.AioRpcError as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
         )

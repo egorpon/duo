@@ -2,12 +2,13 @@ from typing import Any
 
 from fastapi import FastAPI, WebSocket
 
-from api.config import settings
 from api.routers.auth import router as auth_router
+from api.routers.users import router as users_router
 from api.websockets import WebSocketsClient
 
 app = FastAPI()
-app.include_router(auth_router, prefix='/auth', tags=['auth'])
+app.include_router(auth_router, prefix='/auth')
+app.include_router(users_router, prefix='/users')
 
 
 client = WebSocketsClient()
@@ -15,8 +16,7 @@ client = WebSocketsClient()
 
 @app.get('/', tags=['status'])
 def main() -> dict[str, Any]:
-    print(settings)
-    return {'message': 'ok'}
+    return {'status': 'ok'}
 
 
 @app.websocket('/ws')

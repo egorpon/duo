@@ -96,11 +96,11 @@ async def user_update(
     session: AsyncSession | None = None,
     **fields: Any,
 ) -> User:
-    '''
+    """
     Updates `user`
-    
+
     raises `EmailAlreadyUsedError`
-    '''
+    """
     password = fields.pop('password', '')
     if password:
         fields['hashed_password'] = hash_password(password)

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
-from grpc import aio
+from grpc import StatusCode, aio
 
 from api.dependencies import UserServiceDep
 from api.schemas.auth import (
@@ -33,8 +33,14 @@ async def user_register(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.ALREADY_EXISTS:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail='User already exists',
+            )
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail='Failed to register. Try again later',
         )
 
 
@@ -58,6 +64,13 @@ async def user_login(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.INTERNAL:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail='Internal error',
+            )
+
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail=exc.details()
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail='Invalid email or password',
         )

@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
 from google.protobuf.empty_pb2 import Empty
-from grpc import aio
+from grpc import StatusCode, aio
 
 from api.dependencies import UserServiceDep
 from api.schemas.auth import (
@@ -38,8 +38,13 @@ async def user_detail(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.NOT_FOUND:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail='Not Found'
+            )
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=exc.details()
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail='Unexpected error occured',
         )
 
 
@@ -61,8 +66,13 @@ async def user_me(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.UNAUTHENTICATED:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+            )
+
         raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
+            status_code=HTTPStatus.BAD_REQUEST, detail='Bad request'
         )
 
 
@@ -85,8 +95,18 @@ async def user_update_email(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.UNAUTHENTICATED:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail='Unauthenticated'
+            )
+
+        if exc.code == StatusCode.ALREADY_EXISTS:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail='User with this email already exists',
+            )
         raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Unknown error'
         )
 
 
@@ -111,6 +131,11 @@ async def user_update_password(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
+        if exc.code == StatusCode.UNAUTHENTICATED:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail='Unauthenticated'
+            )
+
         raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail=exc.details()
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Unknown error'
         )

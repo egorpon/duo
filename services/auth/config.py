@@ -1,7 +1,13 @@
 from pathlib import Path
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
 from pydantic import Field, PostgresDsn, SecretStr, TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from common.secrets import load_private_key, load_public_key
 
 BASE_PATH = Path(__file__).parent
 
@@ -11,9 +17,10 @@ class AuthSettings(BaseSettings):
         env_file=BASE_PATH / '.env',
         extra='ignore',
     )
-    secret_key: SecretStr = Field(alias='duo_auth_secret_key')
+    private_key_path: Path = Field(alias='duo_auth_private_key_path')
+    public_key_path: Path = Field(alias='duo_auth_public_key_path')
     jwt_lifetime: int = 60 * 60 * 24 * 30  # 30 days
-    jwt_algorithm: str = 'HS256'
+    jwt_algorithm: str = 'EdDSA'
 
     db_host: str = Field(alias='postgres_host')
     db_port: str = Field(alias='postgres_port')
@@ -29,6 +36,12 @@ class AuthSettings(BaseSettings):
             f'{self.db_host}:{self.db_port}/{self.db_name}'
         )
         return TypeAdapter(PostgresDsn).validate_strings(dsn_str)
+
+    def get_private_key(self) -> Ed25519PrivateKey:
+        return load_private_key(self.private_key_path)
+
+    def get_public_key(self) -> Ed25519PublicKey:
+        return load_public_key(self.public_key_path)
 
 
 settings = AuthSettings()  # pyright: ignore[reportCallIssue]

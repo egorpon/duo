@@ -1,5 +1,5 @@
-keys/*
-!keys/.gitkeep
+**/keys/*
+!**/keys/.gitkeep
 
 # generated proto services/messages
 generated/*
@@ -237,6 +237,7 @@ dist
 dist-ssr
 coverage
 *.local
+!.env.local
 
 # Editor directories and files
 .vscode/*

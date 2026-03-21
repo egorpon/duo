@@ -1,5 +1,8 @@
+keys/*
+!keys/.gitkeep
+
 # generated proto services/messages
-generated/
+generated/*
 !generated/__init__.py
 # Byte-compiled / optimized / DLL files
 __pycache__/

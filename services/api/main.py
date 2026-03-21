@@ -6,7 +6,11 @@ from api.routers.auth import router as auth_router
 from api.routers.users import router as users_router
 from api.websockets import WebSocketsClient
 
-app = FastAPI()
+app = FastAPI(
+    title='Duo API',
+    version='v0.0.1',
+    root_path='/api/v1',
+)
 app.include_router(auth_router, prefix='/auth')
 app.include_router(users_router, prefix='/users')
 

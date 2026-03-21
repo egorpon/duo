@@ -1,0 +1,13 @@
+services:
+  postgres-game:
+    image: "postgres:16-alpine"
+    container_name: "game-postgres"
+    env_file:
+      - .env
+    ports:
+      - "25433:5432"
+    volumes:
+      - postgres-game:/var/lib/postgresql/data
+
+volumes:
+  postgres-game:

@@ -1,4 +1,3 @@
-# PYTHONPATH_SERVICES=services/api:services/users:services/billing
 PYTHONPATH_SERVICES=services:generated
 
 type-check:
@@ -17,6 +16,10 @@ api:
 
 auth:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.auth
+
+
+game:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.game
 
 
 ui:
@@ -43,5 +46,18 @@ auth-apply-migrations:
 
 
 auth-connect-to-db:
-	docker compose exec -it postgres psql -U duo_auth -d duo_auth
+	docker compose exec -it auth-postgres psql -U duo_auth -d duo_auth
 
+
+game-make-migrations:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+		-c ./services/game/alembic.ini revision --autogenerate
+
+
+game-apply-migrations:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+		-c ./services/game/alembic.ini upgrade head 
+
+
+game-connect-to-db:
+	docker compose exec -it game-postgres psql -U duo_game -d duo_game

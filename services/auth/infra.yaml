@@ -1,5 +1,5 @@
 services:
-  postgres-auth:
+  auth-postgres:
     image: "postgres:16-alpine"
     container_name: "auth-postgres"
     env_file:
@@ -7,7 +7,7 @@ services:
     ports:
       - "25432:5432"
     volumes:
-      - postgres-auth:/var/lib/postgresql/data
+      - auth-postgres:/var/lib/postgresql/data
 
 volumes:
-  postgres-auth:
+  auth-postgres:

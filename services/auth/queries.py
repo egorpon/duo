@@ -55,8 +55,6 @@ async def get_user_from_token(
             raise InvalidTokenError(
                 'User specified as sub value does not exists'
             )
-        if user.hashed_password != decoded_token.hash:
-            raise ExpiredTokenError('Password hash mismatch, token outdated')
 
         return user
 

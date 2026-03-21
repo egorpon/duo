@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from jwt.types import Options
 from pydantic import BaseModel
 
 from auth.config import settings
@@ -22,7 +23,6 @@ class TokenDetails(BaseModel):
     iat: float
     exp: float
     iss: str
-    hash: str
 
 
 def issue_token(user: User) -> Token:
@@ -33,7 +33,6 @@ def issue_token(user: User) -> Token:
         'iat': now.timestamp(),
         'exp': exp.timestamp(),
         'iss': ISSUER,
-        'hash': user.hashed_password,
     }
 
     key = jwt.encode(
@@ -56,6 +55,7 @@ def decode_token(token: str) -> TokenDetails:
             key=settings.secret_key.get_secret_value(),
             issuer=ISSUER,
             algorithms=[settings.jwt_algorithm],
+            options=Options(verify_signature=True),
         )
         return TokenDetails(**result)
     except jwt.ExpiredSignatureError:

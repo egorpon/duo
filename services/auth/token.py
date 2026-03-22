@@ -37,7 +37,7 @@ def issue_token(user: User) -> Token:
 
     key = jwt.encode(
         payload=payload,
-        key=settings.get_private_key(),
+        key=settings.private_key,
         algorithm=settings.jwt_algorithm,
     )
     return Token(
@@ -52,7 +52,7 @@ def decode_token(token: str) -> TokenDetails:
     try:
         result = jwt.decode(
             jwt=token,
-            key=settings.get_public_key(),
+            key=settings.public_key,
             issuer=ISSUER,
             algorithms=[settings.jwt_algorithm],
             options=Options(verify_signature=True),

@@ -38,10 +38,10 @@ class AuthSettings(BaseSettings):
         return TypeAdapter(PostgresDsn).validate_strings(dsn_str)
 
     def get_private_key(self) -> Ed25519PrivateKey:
-        return load_private_key(self.private_key_path)
+        return load_private_key(BASE_PATH / self.private_key_path)
 
     def get_public_key(self) -> Ed25519PublicKey:
-        return load_public_key(self.public_key_path)
+        return load_public_key(BASE_PATH / self.public_key_path)
 
 
 settings = AuthSettings()  # pyright: ignore[reportCallIssue]

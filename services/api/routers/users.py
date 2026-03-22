@@ -17,6 +17,34 @@ from generated import auth_pb2
 router = APIRouter(tags=['users'])
 
 
+@router.get('/me/')
+async def user_me(
+    credentials: Credentials,
+    stub: UserServiceDep,
+) -> UserDisplay:
+    try:
+        resp = await stub.GetCurrentUser(
+            Empty(),
+            timeout=2,
+            metadata=(('authorization', credentials.credentials),),
+        )
+        return UserDisplay(
+            id=resp.id,
+            email=resp.email,
+            created_at=resp.created_at.ToDatetime().timestamp(),
+            updated_at=resp.updated_at.ToDatetime().timestamp(),
+        )
+    except aio.AioRpcError as exc:
+        if exc.code() == StatusCode.UNAUTHENTICATED:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+            )
+
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail='Bad request'
+        )
+
+
 @router.get('/{user_id}/')
 async def user_detail(
     user_id: int,
@@ -45,34 +73,6 @@ async def user_detail(
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail='Unexpected error occured',
-        )
-
-
-@router.get('/me/')
-async def user_me(
-    credentials: Credentials,
-    stub: UserServiceDep,
-) -> UserDisplay:
-    try:
-        resp = await stub.GetCurrentUser(
-            Empty(),
-            timeout=2,
-            metadata=(('authorization', credentials.credentials),),
-        )
-        return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
-        )
-    except aio.AioRpcError as exc:
-        if exc.code() == StatusCode.UNAUTHENTICATED:
-            raise HTTPException(
-                status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
-            )
-
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail='Bad request'
         )
 
 

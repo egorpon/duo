@@ -38,7 +38,7 @@ async def user_detail(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.NOT_FOUND:
+        if exc.code() == StatusCode.NOT_FOUND:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail='Not Found'
             )
@@ -66,7 +66,7 @@ async def user_me(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.UNAUTHENTICATED:
+        if exc.code() == StatusCode.UNAUTHENTICATED:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
             )
@@ -95,12 +95,12 @@ async def user_update_email(
             updated_at=resp.updated_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.UNAUTHENTICATED:
+        if exc.code() == StatusCode.UNAUTHENTICATED:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED, detail='Unauthenticated'
             )
 
-        if exc.code == StatusCode.ALREADY_EXISTS:
+        if exc.code() == StatusCode.ALREADY_EXISTS:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail='User with this email already exists',
@@ -131,7 +131,7 @@ async def user_update_password(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.UNAUTHENTICATED:
+        if exc.code() == StatusCode.UNAUTHENTICATED:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED, detail='Unauthenticated'
             )

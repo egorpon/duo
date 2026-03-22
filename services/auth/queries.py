@@ -8,7 +8,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from auth.db import get_session_ctx
 from auth.exceptions import (
     EmailAlreadyUsedError,
-    ExpiredTokenError,
     InvalidTokenError,
 )
 from auth.models import User

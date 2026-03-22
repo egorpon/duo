@@ -33,7 +33,7 @@ async def user_register(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.ALREADY_EXISTS:
+        if exc.code() == StatusCode.ALREADY_EXISTS:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail='User already exists',
@@ -64,7 +64,7 @@ async def user_login(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code == StatusCode.INTERNAL:
+        if exc.code() == StatusCode.INTERNAL:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail='Internal error',

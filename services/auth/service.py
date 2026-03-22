@@ -35,7 +35,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     ) -> AuthResponse:
         try:
             user = await user_create(
-                email=request.email, password=request.email
+                email=request.email, password=request.password
             )
         except EmailAlreadyUsedError:
             await context.abort(

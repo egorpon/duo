@@ -1,14 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from jwt.types import Options
 from pydantic import BaseModel
 
 from auth.config import settings
-from auth.exceptions import ExpiredTokenError, InvalidTokenError
 from auth.models import User
-
-ISSUER = 'duo'
+from common.token import ISSUER, TokenDetails
+from common.token import decode_token as _decode_token
 
 
 class Token(BaseModel):
@@ -16,13 +14,6 @@ class Token(BaseModel):
     token_type: str
     issued_at: datetime
     expires_at: datetime
-
-
-class TokenDetails(BaseModel):
-    sub: int
-    iat: float
-    exp: float
-    iss: str
 
 
 def issue_token(user: User) -> Token:
@@ -49,16 +40,8 @@ def issue_token(user: User) -> Token:
 
 
 def decode_token(token: str) -> TokenDetails:
-    try:
-        result = jwt.decode(
-            jwt=token,
-            key=settings.public_key,
-            issuer=ISSUER,
-            algorithms=[settings.jwt_algorithm],
-            options=Options(verify_signature=True),
-        )
-        return TokenDetails(**result)
-    except jwt.ExpiredSignatureError:
-        raise ExpiredTokenError('Token expired')
-    except (jwt.PyJWTError, jwt.InvalidTokenError):
-        raise InvalidTokenError('Invalid token')
+    return _decode_token(
+        token=token,
+        public_key=settings.public_key,
+        algorithm=settings.jwt_algorithm,
+    )

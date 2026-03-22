@@ -6,10 +6,7 @@ from grpc import aio
 
 from auth.interceptors import AuthInterceptor
 from auth.service import UserService
-from common.logging.main import setup_logging
 from generated import auth_pb2_grpc
-
-setup_logging()
 
 logger = logging.getLogger('duo.auth')
 

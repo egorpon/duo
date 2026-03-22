@@ -29,10 +29,10 @@ async def user_me(
             metadata=(('authorization', credentials.credentials),),
         )
         return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
+            id=resp.id,  # pyright: ignore[reportUnknownArgumentType]
+            email=resp.email,  # pyright: ignore[reportUnknownArgumentType]
+            created_at=resp.created_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
+            updated_at=resp.updated_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:
@@ -53,17 +53,17 @@ async def user_detail(
 ) -> UserDisplay:
     try:
         resp = await stub.GetUserById(
-            auth_pb2.GetUserByIdRequest(
+            auth_pb2.GetUserByIdRequest(  # pyright: ignore[reportAttributeAccessIssue]
                 id=user_id,
             ),
             timeout=2,
             metadata=(('authorization', credentials.credentials),),
         )
         return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
+            id=resp.id,  # pyright: ignore[reportUnknownArgumentType]
+            email=resp.email,  # pyright: ignore[reportUnknownArgumentType]
+            created_at=resp.created_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
+            updated_at=resp.updated_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.NOT_FOUND:
@@ -84,15 +84,15 @@ async def user_update_email(
 ) -> UserDisplay:
     try:
         resp = await stub.UpdateUserEmail(
-            auth_pb2.UpdateUserEmailRequest(new_email=data.email),
+            auth_pb2.UpdateUserEmailRequest(new_email=data.email),  # pyright: ignore[reportAttributeAccessIssue]
             timeout=2,
             metadata=(('authorization', credentials.credentials),),
         )
         return UserDisplay(
-            id=resp.id,
-            email=resp.email,
-            created_at=resp.created_at.ToDatetime().timestamp(),
-            updated_at=resp.updated_at.ToDatetime().timestamp(),
+            id=resp.id,  # pyright: ignore[reportUnknownArgumentType]
+            email=resp.email,  # pyright: ignore[reportUnknownArgumentType]
+            created_at=resp.created_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
+            updated_at=resp.updated_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:
@@ -118,17 +118,17 @@ async def user_update_password(
 ) -> JsonWebToken:
     try:
         resp = await stub.UpdateUserPassword(
-            auth_pb2.UpdateUserPasswordRequest(
+            auth_pb2.UpdateUserPasswordRequest(  # pyright: ignore[reportAttributeAccessIssue]
                 new_password=data.password.get_secret_value()
             ),
             timeout=2,
             metadata=(('authorization', credentials.credentials),),
         )
         return JsonWebToken(
-            access_token=resp.access_token,
+            access_token=resp.access_token,  # pyright: ignore[reportUnknownArgumentType]
             token_type='Bearer',
-            issued_at=resp.issued_at.ToDatetime().timestamp(),
-            expires_at=resp.expires_at.ToDatetime().timestamp(),
+            issued_at=resp.issued_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
+            expires_at=resp.expires_at.ToDatetime().timestamp(),  # pyright: ignore[reportUnknownArgumentType]
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:

@@ -83,7 +83,7 @@ reportMissingTypeStubs = false
 reportUnknownMemberType = false
 reportUnknownParameterType = false
 reportUnknownVariableType = false
-reportAttributeAccessIssue = false
+reportAttributeAccessIssue = true
 reportUnknownArgumentType = false
 
 
@@ -103,6 +103,7 @@ exclude = [
     ".mypy_cache",
     ".ruff_cache",
     "**/generated/**",
+    "**/versions/**",
 ]
 extraPaths = ["services", "common"]
 

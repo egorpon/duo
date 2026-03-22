@@ -16,13 +16,13 @@ from auth.queries import (
 from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
-    AuthResponse,
-    CreateUserRequest,
-    GetUserByIdRequest,
-    LoginUserRequest,
-    UpdateUserEmailRequest,
-    UpdateUserPasswordRequest,
-    User,
+    AuthResponse,  # pyright: ignore[reportAttributeAccessIssue]
+    CreateUserRequest,  # pyright: ignore[reportAttributeAccessIssue]
+    GetUserByIdRequest,  # pyright: ignore[reportAttributeAccessIssue]
+    LoginUserRequest,  # pyright: ignore[reportAttributeAccessIssue]
+    UpdateUserEmailRequest,  # pyright: ignore[reportAttributeAccessIssue]
+    UpdateUserPasswordRequest,  # pyright: ignore[reportAttributeAccessIssue]
+    User,  # pyright: ignore[reportAttributeAccessIssue]
 )
 
 
@@ -35,7 +35,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     ) -> AuthResponse:
         try:
             user = await user_create(
-                email=request.email, password=request.password
+                email=request.email,  # pyright: ignore[reportUnknownArgumentType]
+                password=request.password,  # pyright: ignore[reportUnknownArgumentType]
             )
         except EmailAlreadyUsedError:
             await context.abort(
@@ -53,7 +54,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     async def LoginUser(
         self, request: LoginUserRequest, context: ServicerContext[Any, Any]
     ) -> AuthResponse:
-        user = await get_user_by_email(email=request.email)
+        user = await get_user_by_email(email=request.email)  # pyright: ignore[reportUnknownArgumentType]
         if user is None:
             await context.abort(
                 code=StatusCode.NOT_FOUND,
@@ -61,7 +62,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
             )
 
         assert user is not None
-        if not check_password(request.password, user.hashed_password):
+        if not check_password(request.password, user.hashed_password):  # pyright: ignore[reportUnknownArgumentType]
             await context.abort(
                 code=StatusCode.INVALID_ARGUMENT,
                 details='Invalid password',
@@ -159,7 +160,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     async def GetUserById(
         self, request: GetUserByIdRequest, context: ServicerContext[Any, Any]
     ) -> User:
-        user = await get_user_by_id(id=request.id)
+        user = await get_user_by_id(id=request.id)  # pyright: ignore[reportUnknownArgumentType]
         if user is None:
             await context.abort(
                 code=StatusCode.NOT_FOUND,

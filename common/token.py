@@ -1,5 +1,6 @@
 import jwt
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from jwt.types import Options
 from pydantic import BaseModel
 
 from common.exceptions import ExpiredTokenError, InvalidTokenError
@@ -26,7 +27,7 @@ def decode_token(
             key=public_key,
             issuer=ISSUER,
             algorithms=[algorithm],
-            options=jwt.types.Options(verify_signature=True),
+            options=Options(verify_signature=True),
         )
         return TokenDetails(**result)
     except jwt.ExpiredSignatureError:

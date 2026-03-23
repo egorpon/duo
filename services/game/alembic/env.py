@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 def get_target_metadata():
-    from game.models import (  # noqa
+    from services.game.models import (  # noqa
         TimeStampedModel,
         Game,  # pyright: ignore
         GameMove, # pyright: ignore
@@ -39,7 +39,7 @@ target_metadata = get_target_metadata()
 
 
 def get_db_dsn():
-    from game.config import settings  # noqa
+    from services.game.config import settings  # noqa
 
     return settings.db_dsn
 

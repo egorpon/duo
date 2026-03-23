@@ -1,4 +1,4 @@
-from game.engines.tic_tac_toe import GameState, TicTacToe
+from services.game.engines.tic_tac_toe import GameState, TicTacToe
 
 
 def test_empty_board():

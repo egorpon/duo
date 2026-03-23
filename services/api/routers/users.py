@@ -4,15 +4,15 @@ from fastapi import APIRouter, HTTPException
 from google.protobuf.empty_pb2 import Empty
 from grpc import StatusCode, aio
 
-from api.dependencies import UserServiceDep
-from api.schemas.auth import (
+from generated import auth_pb2
+from services.api.dependencies import UserServiceDep
+from services.api.schemas.auth import (
     JsonWebToken,
     UserDisplay,
     UserUpdateEmailRequest,
     UserUpdatePasswordRequest,
 )
-from api.security import Credentials
-from generated import auth_pb2
+from services.api.security import Credentials
 
 router = APIRouter(tags=['users'])
 

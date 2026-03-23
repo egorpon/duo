@@ -2,9 +2,9 @@ from typing import Any
 
 from fastapi import FastAPI, WebSocket
 
-from api.routers.auth import router as auth_router
-from api.routers.users import router as users_router
-from api.websockets import WebSocketsClient
+from services.api.routers.auth import router as auth_router
+from services.api.routers.users import router as users_router
+from services.api.websockets import WebSocketsClient
 
 app = FastAPI(
     title='Duo API',

@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends
 from grpc import aio
 
-from api.config import settings
 from generated import auth_pb2_grpc
+from services.api.config import settings
 
 channel = aio.insecure_channel(str(settings.auth_service_url))
 stub = auth_pb2_grpc.UserServiceStub(channel)

@@ -3,12 +3,12 @@ from http import HTTPStatus
 from fastapi import APIRouter, HTTPException
 from grpc import StatusCode, aio
 
-from api.dependencies import UserServiceDep
-from api.schemas.auth import (
+from generated import auth_pb2
+from services.api.dependencies import UserServiceDep
+from services.api.schemas.auth import (
     JsonWebToken,
     UserRegisterRequest,
 )
-from generated import auth_pb2
 
 router = APIRouter(tags=['auth'])
 

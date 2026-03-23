@@ -1,5 +1,3 @@
-PYTHONPATH_SERVICES=services:generated
-
 type-check:
 	./.venv/bin/basedpyright
 	./.venv/bin/mypy .
@@ -11,40 +9,43 @@ format:
 
 
 api:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.api
+	./.venv/bin/python -m services.api
 
 
 auth:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.auth
+	 ./.venv/bin/python -m services.auth
 
 
 game:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/python -m services.game
+	 ./.venv/bin/python -m services.game
 
 
 ui:
 	cd ./services/ui/; npm run dev
 
 
+# copy .proto files inside generate so result files will have correct imports
 generate-proto:
+	cp proto/*.proto generated/
 	./.venv/bin/python \
 		-m grpc_tools.protoc \
-		-I proto \
-		--python_out=generated \
-		--grpc_python_out=generated \
-		proto/*.proto
+		-I . \
+		--python_out=. \
+		--grpc_python_out=. \
+		generated/*.proto
+	rm generated/*.proto
 
 test:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/pytest
+	 ./.venv/bin/pytest
 
 
 auth-make-migrations:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+	 ./.venv/bin/alembic \
 		-c ./services/auth/alembic.ini revision --autogenerate
 
 
 auth-apply-migrations:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+	 ./.venv/bin/alembic \
 		-c ./services/auth/alembic.ini upgrade head 
 
 
@@ -53,12 +54,12 @@ auth-connect-to-db:
 
 
 game-make-migrations:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+	 ./.venv/bin/alembic \
 		-c ./services/game/alembic.ini revision --autogenerate
 
 
 game-apply-migrations:
-	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \
+	 ./.venv/bin/alembic \
 		-c ./services/game/alembic.ini upgrade head 
 
 

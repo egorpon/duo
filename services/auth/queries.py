@@ -5,13 +5,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from auth.db import get_session_ctx
-from auth.exceptions import EmailAlreadyUsedError
-from auth.models import User
-from auth.password import hash_password
-from auth.token import decode_token
 from common.exceptions import InvalidTokenError
 from common.models import model_update
+from services.auth.db import get_session_ctx
+from services.auth.exceptions import EmailAlreadyUsedError
+from services.auth.models import User
+from services.auth.password import hash_password
+from services.auth.token import decode_token
 
 
 async def get_user_by_id(

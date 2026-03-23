@@ -106,7 +106,6 @@ exclude = [
     "**/generated/**",
     "**/versions/**",
 ]
-extraPaths = ["services", "common"]
 
 
 [tool.pytest.ini_options]

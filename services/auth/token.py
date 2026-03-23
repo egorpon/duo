@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from pydantic import BaseModel
 
-from auth.config import settings
-from auth.models import User
 from common.token import ISSUER, TokenDetails
 from common.token import decode_token as _decode_token
+from services.auth.config import settings
+from services.auth.models import User
 
 
 class Token(BaseModel):

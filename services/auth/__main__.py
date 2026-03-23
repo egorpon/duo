@@ -4,9 +4,9 @@ import signal
 
 from grpc import aio
 
-from auth.interceptors import AuthInterceptor
-from auth.service import UserService
 from generated import auth_pb2_grpc
+from services.auth.interceptors import AuthInterceptor
+from services.auth.service import UserService
 
 logger = logging.getLogger('duo.auth')
 

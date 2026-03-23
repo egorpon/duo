@@ -4,16 +4,6 @@ from google.protobuf.empty_pb2 import Empty
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
-from auth.exceptions import EmailAlreadyUsedError
-from auth.interceptors import get_current_user
-from auth.password import check_password
-from auth.queries import (
-    get_user_by_email,
-    get_user_by_id,
-    user_create,
-    user_update,
-)
-from auth.token import issue_token
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
     AuthResponse,  # pyright: ignore[reportAttributeAccessIssue]
@@ -24,6 +14,16 @@ from generated.auth_pb2 import (
     UpdateUserPasswordRequest,  # pyright: ignore[reportAttributeAccessIssue]
     User,  # pyright: ignore[reportAttributeAccessIssue]
 )
+from services.auth.exceptions import EmailAlreadyUsedError
+from services.auth.interceptors import get_current_user
+from services.auth.password import check_password
+from services.auth.queries import (
+    get_user_by_email,
+    get_user_by_id,
+    user_create,
+    user_update,
+)
+from services.auth.token import issue_token
 
 
 class UserService(auth_pb2_grpc.UserServiceServicer):

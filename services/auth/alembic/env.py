@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 def get_target_metadata():
-    from auth.models import (  # noqa
+    from services.auth.models import (  # noqa
         TimeStampedModel,
         User,  # pyright: ignore
     )
@@ -38,7 +38,7 @@ target_metadata = get_target_metadata()
 
 
 def get_db_dsn():
-    from auth.config import settings  # noqa
+    from services.auth.config import settings  # noqa
 
     return settings.db_dsn
 

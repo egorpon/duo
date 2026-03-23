@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from auth.config import settings
+from services.auth.config import settings
 
 
 def get_db_engine() -> AsyncEngine:

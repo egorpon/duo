@@ -34,6 +34,9 @@ generate-proto:
 		--grpc_python_out=generated \
 		proto/*.proto
 
+test:
+	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/pytest
+
 
 auth-make-migrations:
 	PYTHONPATH=$(PYTHONPATH_SERVICES) ./.venv/bin/alembic \

@@ -17,6 +17,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.11.0",
+    "pytest>=9.0.2",
     "sqlmodel>=0.0.32",
     "uvicorn>=0.40.0",
     "websockets>=16.0",
@@ -41,8 +42,7 @@ exclude = [
     "**/alembic/**",
     ".mypy_cache",
     ".ruff_cache",
-    "generated",
-]
+    "generated", ]
 
 
 [tool.ruff.lint]
@@ -107,3 +107,30 @@ exclude = [
 ]
 extraPaths = ["services", "common"]
 
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra --strict-markers --disable-warnings"
+testpaths = ["services"]
+norecursedirs = ["*.egg", ".git", "__pycache__"]
+
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+pythonpath = [
+    ".",
+    "services",
+    "generated",
+]
+
+markers = [
+    "unit: fast unit tests",
+    "integration: integration tests",
+    "e2e: end-to-end tests",
+    "slow: slow tests"
+]
+
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]

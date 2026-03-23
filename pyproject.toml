@@ -18,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.11.0",
     "pytest>=9.0.2",
+    "pytest-cov>=7.1.0",
     "sqlmodel>=0.0.32",
     "uvicorn>=0.40.0",
     "websockets>=16.0",
@@ -110,7 +111,13 @@ extraPaths = ["services", "common"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra --strict-markers --disable-warnings"
+addopts = """
+-ra 
+--strict-markers 
+--disable-warnings
+--cov=services
+--cov-report=term-missing
+"""
 testpaths = ["services"]
 norecursedirs = ["*.egg", ".git", "__pycache__"]
 
@@ -133,4 +140,11 @@ markers = [
 
 filterwarnings = [
     "ignore::DeprecationWarning"
+]
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "ui",
 ]

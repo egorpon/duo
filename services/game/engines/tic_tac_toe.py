@@ -10,9 +10,8 @@ BOARD_SIZE = 3
 
 
 class GameState(BaseModel):
-    current_player: int
-    player1: int
-    player2: int
+    current_player: Turn
+    players: dict[Turn, int]
     board: Board
 
     def model_post_init(self, context: Any, /) -> None:
@@ -47,22 +46,13 @@ class TicTacToe:
     def __init__(self, state: GameState) -> None:
         self.state = state
 
-    def is_win(self) -> bool:
-        """Checks if game is won or not"""
-
-        for coords in WINNING_COORDS:
-            if self._check_win(board=self.state.board, coords=coords):
-                return True
-        return False
-
     @staticmethod
     def _check_win(board: Board, coords: Row) -> bool:
-        c = coords
         return (
-            board[c[0][0]][c[0][1]]
-            == board[c[1][0]][c[1][1]]
-            == board[c[2][0]][c[2][1]]
-            and board[c[0][0]][c[0][1]] is not None
+            board[coords[0][0]][coords[0][1]]
+            == board[coords[1][0]][coords[1][1]]
+            == board[coords[2][0]][coords[2][1]]
+            and board[coords[0][0]][coords[0][1]] is not None
         )
 
     def _get_win_path(self) -> Row | None:
@@ -82,8 +72,4 @@ class TicTacToe:
 
         symbol: Turn | None = self.state.board[path[0][0]][path[0][1]]
         assert symbol is not None
-        if symbol == 'x':
-            return self.state.player1
-
-        return self.state.player2
-        
+        return self.state.players[symbol]

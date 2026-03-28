@@ -20,17 +20,17 @@ async def user_register(
 ) -> JsonWebToken:
     try:
         resp = await stub.CreateUser(
-            auth_pb2.CreateUserRequest(  
+            auth_pb2.CreateUserRequest(
                 email=data.email,
                 password=data.password.get_secret_value(),
             ),
             timeout=2,
         )
         return JsonWebToken(
-            access_token=resp.access_token,  
+            access_token=resp.access_token,
             token_type='Bearer',
-            issued_at=resp.issued_at.ToDatetime().timestamp(),  
-            expires_at=resp.expires_at.ToDatetime().timestamp(),  
+            issued_at=resp.issued_at.ToDatetime().timestamp(),
+            expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.ALREADY_EXISTS:
@@ -51,17 +51,17 @@ async def user_login(
 ) -> JsonWebToken:
     try:
         resp = await stub.LoginUser(
-            auth_pb2.LoginUserRequest(  
+            auth_pb2.LoginUserRequest(
                 email=data.email,
                 password=data.password.get_secret_value(),
             ),
             timeout=2,
         )
         return JsonWebToken(
-            access_token=resp.access_token,  
+            access_token=resp.access_token,
             token_type='Bearer',
-            issued_at=resp.issued_at.ToDatetime().timestamp(),  
-            expires_at=resp.expires_at.ToDatetime().timestamp(),  
+            issued_at=resp.issued_at.ToDatetime().timestamp(),
+            expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.INTERNAL:

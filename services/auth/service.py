@@ -1,18 +1,19 @@
 from typing import Any, override
 
 from google.protobuf.empty_pb2 import Empty
+from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
-    AuthResponse,  # pyright: ignore[reportAttributeAccessIssue]
-    CreateUserRequest,  # pyright: ignore[reportAttributeAccessIssue]
-    GetUserByIdRequest,  # pyright: ignore[reportAttributeAccessIssue]
-    LoginUserRequest,  # pyright: ignore[reportAttributeAccessIssue]
-    UpdateUserEmailRequest,  # pyright: ignore[reportAttributeAccessIssue]
-    UpdateUserPasswordRequest,  # pyright: ignore[reportAttributeAccessIssue]
-    User,  # pyright: ignore[reportAttributeAccessIssue]
+    AuthResponse,
+    CreateUserRequest,
+    GetUserByIdRequest,
+    LoginUserRequest,
+    UpdateUserEmailRequest,
+    UpdateUserPasswordRequest,
+    User,
 )
 from services.auth.exceptions import EmailAlreadyUsedError
 from services.auth.interceptors import get_current_user
@@ -35,8 +36,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
     ) -> AuthResponse:
         try:
             user = await user_create(
-                email=request.email,  # pyright: ignore[reportUnknownArgumentType]
-                password=request.password,  # pyright: ignore[reportUnknownArgumentType]
+                email=request.email,
+                password=request.password,
             )
         except EmailAlreadyUsedError:
             await context.abort(
@@ -46,15 +47,15 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=token.expires_at,
-            issued_at=token.issued_at,
+            expires_at=Timestamp().FromDatetime(token.expires_at),
+            issued_at=Timestamp().FromDatetime(token.issued_at),
         )
 
     @override
     async def LoginUser(
         self, request: LoginUserRequest, context: ServicerContext[Any, Any]
     ) -> AuthResponse:
-        user = await get_user_by_email(email=request.email)  # pyright: ignore[reportUnknownArgumentType]
+        user = await get_user_by_email(email=request.email)
         if user is None:
             await context.abort(
                 code=StatusCode.NOT_FOUND,
@@ -62,7 +63,7 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
             )
 
         assert user is not None
-        if not check_password(request.password, user.hashed_password):  # pyright: ignore[reportUnknownArgumentType]
+        if not check_password(request.password, user.hashed_password):
             await context.abort(
                 code=StatusCode.INVALID_ARGUMENT,
                 details='Invalid password',
@@ -71,8 +72,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=token.expires_at,
-            issued_at=token.issued_at,
+            expires_at=Timestamp().FromDatetime(token.expires_at),
+            issued_at=Timestamp().FromDatetime(token.issued_at),
         )
 
     @override
@@ -101,11 +102,12 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 code=StatusCode.INTERNAL, details='Unhandled exception'
             )
 
+        assert user.id is not None
         return User(
             id=user.id,
             email=user.email,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
+            created_at=Timestamp().FromDatetime(user.created_at),
+            updated_at=Timestamp().FromDatetime(user.updated_at),
         )
 
     @override
@@ -133,8 +135,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=token.expires_at,
-            issued_at=token.issued_at,
+            expires_at=Timestamp().FromDatetime(token.expires_at),
+            issued_at=Timestamp().FromDatetime(token.issued_at),
         )
 
     @override
@@ -149,18 +151,19 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
             )
 
         assert user is not None
+        assert user.id is not None
         return User(
             id=user.id,
             email=user.email,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
+            created_at=Timestamp().FromDatetime(user.created_at),
+            updated_at=Timestamp().FromDatetime(user.updated_at),
         )
 
     @override
     async def GetUserById(
         self, request: GetUserByIdRequest, context: ServicerContext[Any, Any]
     ) -> User:
-        user = await get_user_by_id(id=request.id)  # pyright: ignore[reportUnknownArgumentType]
+        user = await get_user_by_id(id=request.id)
         if user is None:
             await context.abort(
                 code=StatusCode.NOT_FOUND,
@@ -168,9 +171,10 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
             )
 
         assert user is not None
+        assert user.id is not None
         return User(
             id=user.id,
             email=user.email,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
+            created_at=Timestamp().FromDatetime(user.created_at),
+            updated_at=Timestamp().FromDatetime(user.updated_at),
         )

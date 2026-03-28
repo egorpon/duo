@@ -2,11 +2,7 @@ set dotenv-load := true
 
 venv := "./.venv/bin"
 
-
-check:
-    format
-    type-check
-    test
+check: format type-check test
     
 # runs basedpyright
 type-check:

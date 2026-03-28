@@ -33,6 +33,7 @@ def test_wrong_player_making_turn():
     engine = TicTacToe(state=state)
     assert engine.is_move_possible(Move(turn='o', coordinate=(0, 0))) is False
 
+
 def test_place_already_taken():
     state = GameState(
         current_player='o',

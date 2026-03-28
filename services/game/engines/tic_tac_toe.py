@@ -8,6 +8,7 @@ type Board = list[list[Turn | None]]
 type Coordinate = tuple[int, int]
 type Row = tuple[Coordinate, Coordinate, Coordinate]
 
+
 class Move(BaseModel):
     turn: Turn
     coordinate: Coordinate
@@ -84,5 +85,12 @@ class TicTacToe:
 
         return self.state.board[move.coordinate[0]][move.coordinate[1]] is None
 
-    def make_move(self) -> None:
-        pass
+    def make_move(self, move: Move) -> None:
+        if not self.is_move_possible(move):
+            return None
+
+        self.state.board[move.coordinate[0]][move.coordinate[1]] = move.turn
+        if move.turn == 'x':
+            self.state.current_player = 'o'
+        else:
+            self.state.current_player = 'x'

@@ -12,13 +12,10 @@ dependencies = [
     "email-validator>=2.3.0",
     "fastapi>=0.128.0",
     "grpcio>=1.76.0",
-    "grpcio-tools>=1.76.0",
     "protobuf>=6.33.4",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.11.0",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.1.0",
     "sqlmodel>=0.0.32",
     "uvicorn>=0.40.0",
     "websockets>=16.0",
@@ -27,9 +24,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "mypy>=1.19.1",
     "ruff>=0.14.11",
     "basedpyright>=1.37.1",
+    "grpcio-tools>=1.76.0",
+    "mypy-protobuf>=5.0.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.1.0",
 ]
 
 
@@ -41,7 +41,6 @@ exclude = [
     ".vscode",
     ".pytest_cache",
     "**/alembic/**",
-    ".mypy_cache",
     ".ruff_cache",
     "generated", ]
 
@@ -56,43 +55,16 @@ quote-style = "single"
 indent-style = "space"
 
 
-[tool.mypy]
-python_version = "3.14"
-strict = true
-ignore_missing_imports = true
-exclude = '(^|/)generated/'
-disable_error_code = [
-  "attr-defined",
-  "arg-type",
-  "call-arg",
-  "no-untyped-def",
-  "no-untyped-call",
-]
-
-
-[[tool.mypy.overrides]]
-module = "generated.*"
-disallow_untyped_defs = false
-
-
 [tool.basedpyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.14"
-
-reportMissingImports = "error"
-reportMissingTypeStubs = false
-reportUnknownMemberType = false
-reportUnknownParameterType = false
-reportUnknownVariableType = false
+extraPaths = ["generated"]
 reportAttributeAccessIssue = true
-reportUnknownArgumentType = false
-
 
 venv = ".venv"
 venvPath = "."
 
 include = ["services", "common"]
-ignore = ["**/generated/**"]
 exclude = [
     "services/ui/**",
     "**/node_modules",
@@ -101,10 +73,10 @@ exclude = [
     ".vscode",
     ".pytest_cache",
     "**/migrations/**",
-    ".mypy_cache",
     ".ruff_cache",
-    "**/generated/**",
     "**/versions/**",
+    "generated/**/*_pb2.py", 
+    "generated/**/*_pb2_grpc.py" 
 ]
 
 
@@ -114,8 +86,6 @@ addopts = """
 -ra 
 --strict-markers 
 --disable-warnings
---cov=services
---cov-report=term-missing
 """
 testpaths = ["services"]
 norecursedirs = ["*.egg", ".git", "__pycache__"]

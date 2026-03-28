@@ -5,6 +5,13 @@ from pydantic import BaseModel
 type Turn = Literal['x', 'o']
 type Board = list[list[Turn | None]]
 
+type Coordinate = tuple[int, int]
+type Row = tuple[Coordinate, Coordinate, Coordinate]
+
+class Move(BaseModel):
+    turn: Turn
+    coordinate: Coordinate
+
 
 BOARD_SIZE = 3
 
@@ -22,9 +29,6 @@ class GameState(BaseModel):
             if len(row) != BOARD_SIZE:
                 raise ValueError(f'Invalid board size: {len(row)}')
 
-
-type Coordinate = tuple[int, int]
-type Row = tuple[Coordinate, Coordinate, Coordinate]
 
 WINNING_COORDS: list[Row] = [
     ((0, 0), (0, 1), (0, 2)),
@@ -73,3 +77,12 @@ class TicTacToe:
         symbol: Turn | None = self.state.board[path[0][0]][path[0][1]]
         assert symbol is not None
         return self.state.players[symbol]
+
+    def is_move_possible(self, move: Move) -> bool:
+        if self.state.current_player != move.turn:
+            return False
+
+        return self.state.board[move.coordinate[0]][move.coordinate[1]] is None
+
+    def make_move(self) -> None:
+        pass

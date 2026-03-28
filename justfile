@@ -1,14 +1,20 @@
+set dotenv-load := true
+
 venv := "./.venv/bin"
 
 
-hello:
-    echo "Empty just"
-
+check:
+    format
+    type-check
+    test
     
-# runs basedpyright and mypy
+# runs basedpyright
 type-check:
     {{venv}}/basedpyright
-    {{venv}}/mypy .
+
+
+lint:
+    {{venv}}/ruff check
 
 
 # formats code with ruff
@@ -20,6 +26,8 @@ format:
 test:
     {{venv}}/pytest
 
+test-cov:
+    {{venv}}/pytest --cov=services --cov-report=term-missing
 
 # options: api, auth, game
 run APP:
@@ -31,14 +39,16 @@ ui:
 
 
 generate-proto:
-	cp proto/*.proto generated/
+	cp ./proto/*.proto ./generated/
 	{{venv}}/python \
 		-m grpc_tools.protoc \
 		-I . \
 		--python_out=. \
 		--grpc_python_out=. \
-		generated/*.proto
-	rm generated/*.proto
+		--mypy_out=. \
+		--mypy_grpc_out=. \
+		./generated/*.proto
+	rm ./generated/*.proto
 
 
 # options: auth, game
@@ -53,3 +63,8 @@ apply-migrations APP:
 # options: auth, game
 connect-to-db APP:
 	docker compose exec -it {{APP}}-postgres psql -U duo_{{APP}} -d duo_{{APP}}
+
+
+clean:
+    find . -type d -name __pycache__ -exec rm -rf {} +
+    find . -name "*.pyc" -delete

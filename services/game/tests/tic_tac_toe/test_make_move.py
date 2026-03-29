@@ -1,4 +1,7 @@
+import pytest
+
 from services.game.engines.tic_tac_toe import GameState, Move, TicTacToe
+from services.game.exceptions import InvalidMoveError
 
 P1 = 1
 P2 = 2
@@ -33,7 +36,9 @@ def test_invalid_move_does_not_change_state():
     )
 
     engine = TicTacToe(state=state)
-    engine.make_move(Move(turn='o', coordinate=(0, 0)))
+    with pytest.raises(InvalidMoveError):
+        engine.make_move(Move(turn='o', coordinate=(0, 0)))
+
     assert state.current_player == 'o'
     assert state.board[0][0] == 'x'
 

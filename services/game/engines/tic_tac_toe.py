@@ -2,6 +2,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
+from services.game.exceptions import InvalidMoveError
+
 type Turn = Literal['x', 'o']
 type Board = list[list[Turn | None]]
 
@@ -80,6 +82,9 @@ class TicTacToe:
         return self.state.players[symbol]
 
     def is_move_possible(self, move: Move) -> bool:
+        if self.get_winner() is not None:
+            return False
+
         if self.state.current_player != move.turn:
             return False
 
@@ -87,7 +92,7 @@ class TicTacToe:
 
     def make_move(self, move: Move) -> None:
         if not self.is_move_possible(move):
-            return None
+            raise InvalidMoveError('Move is invalid')
 
         self.state.board[move.coordinate[0]][move.coordinate[1]] = move.turn
         if move.turn == 'x':

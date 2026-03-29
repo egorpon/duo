@@ -47,3 +47,18 @@ def test_place_already_taken():
 
     engine = TicTacToe(state=state)
     assert engine.is_move_possible(Move(turn='o', coordinate=(1, 1))) is False
+
+
+def test_already_won():
+    state = GameState(
+        current_player='o',
+        players={'x': P1, 'o': P2},
+        board=[
+            ['x', 'o', None],
+            [None, 'x', 'o'],
+            [None, None, 'x'],
+        ],
+    )
+
+    engine = TicTacToe(state=state)
+    assert engine.is_move_possible(Move(turn='o', coordinate=(1, 0))) is False

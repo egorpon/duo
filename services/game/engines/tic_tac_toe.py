@@ -4,6 +4,19 @@ from pydantic import BaseModel
 
 from services.game.exceptions import InvalidMoveError
 
+BOARD_SIZE = 3
+
+WINNING_COORDS: list[Row] = [
+    ((0, 0), (0, 1), (0, 2)),
+    ((1, 0), (1, 1), (1, 2)),
+    ((2, 0), (2, 1), (2, 2)),
+    ((0, 0), (1, 0), (2, 0)),
+    ((0, 1), (1, 1), (2, 1)),
+    ((0, 2), (1, 2), (2, 2)),
+    ((0, 0), (1, 1), (2, 2)),
+    ((0, 2), (1, 1), (2, 0)),
+]
+
 type Turn = Literal['x', 'o']
 type Board = list[list[Turn | None]]
 
@@ -11,12 +24,17 @@ type Coordinate = tuple[int, int]
 type Row = tuple[Coordinate, Coordinate, Coordinate]
 
 
+def make_board() -> Board:
+    return [
+        [None, None, None],
+        [None, None, None],
+        [None, None, None],
+    ]
+
+
 class Move(BaseModel):
     turn: Turn
     coordinate: Coordinate
-
-
-BOARD_SIZE = 3
 
 
 class GameState(BaseModel):
@@ -31,18 +49,6 @@ class GameState(BaseModel):
         for row in self.board:
             if len(row) != BOARD_SIZE:
                 raise ValueError(f'Invalid board size: {len(row)}')
-
-
-WINNING_COORDS: list[Row] = [
-    ((0, 0), (0, 1), (0, 2)),
-    ((1, 0), (1, 1), (1, 2)),
-    ((2, 0), (2, 1), (2, 2)),
-    ((0, 0), (1, 0), (2, 0)),
-    ((0, 1), (1, 1), (2, 1)),
-    ((0, 2), (1, 2), (2, 2)),
-    ((0, 0), (1, 1), (2, 2)),
-    ((0, 2), (1, 1), (2, 0)),
-]
 
 
 class TicTacToe:

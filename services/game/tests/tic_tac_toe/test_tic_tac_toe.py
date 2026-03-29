@@ -1,4 +1,4 @@
-from services.game.engines.tic_tac_toe import GameState, Move, TicTacToe
+from services.game.engines.tic_tac_toe import Move, TicTacToe, TicTacToeState
 
 P1 = 1
 P2 = 2
@@ -6,7 +6,7 @@ P2 = 2
 
 def test_full_game_until_winner():
     engine = TicTacToe(
-        state=GameState(
+        state=TicTacToeState(
             current_player='x',
             players={'x': P1, 'o': P2},
             board=[

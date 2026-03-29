@@ -1,8 +1,15 @@
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
+from services.game.engines.base import GameEngine
 from services.game.exceptions import InvalidMoveError
+
+type Turn = Literal['x', 'o']
+type Board = list[list[Turn | None]]
+
+type Coordinate = tuple[int, int]
+type Row = tuple[Coordinate, Coordinate, Coordinate]
 
 BOARD_SIZE = 3
 
@@ -16,12 +23,6 @@ WINNING_COORDS: list[Row] = [
     ((0, 0), (1, 1), (2, 2)),
     ((0, 2), (1, 1), (2, 0)),
 ]
-
-type Turn = Literal['x', 'o']
-type Board = list[list[Turn | None]]
-
-type Coordinate = tuple[int, int]
-type Row = tuple[Coordinate, Coordinate, Coordinate]
 
 
 def make_board() -> Board:
@@ -37,27 +38,40 @@ class Move(BaseModel):
     coordinate: Coordinate
 
 
-class GameState(BaseModel):
+class TicTacToeState(BaseModel):
     current_player: Turn
     players: dict[Turn, int]
     board: Board
 
-    def model_post_init(self, context: Any, /) -> None:
-        if len(self.board) != BOARD_SIZE:
-            raise ValueError(f'Invalid board size: {len(self.board)}')
+    @field_validator('board')
+    @classmethod
+    def validate_board(cls, board: Board) -> Board:
+        if len(board) != BOARD_SIZE:
+            raise ValueError(f'Invalid board size: {len(board)}')
 
-        for row in self.board:
+        for row in board:
             if len(row) != BOARD_SIZE:
                 raise ValueError(f'Invalid board size: {len(row)}')
+            for cell in row:
+                if cell not in ('x', 'o', None):
+                    raise ValueError(f'Invalid cell value: {cell}')
+        return board
 
 
-class TicTacToe:
-    """Main class to handle all actions related to the Tic Tac Toe game"""
+class TicTacToePlayerView(BaseModel):
+    board: Board
+    your_turn: bool
+    your_symbol: Turn
+    winner: int | None
+    is_draw: bool
 
-    state: GameState
 
-    def __init__(self, state: GameState) -> None:
-        self.state = state
+class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
+    """
+    Main class to handle all actions related to the Tic Tac Toe game
+    P1 plays with 'x'
+    P2 plays with 'o'
+    """
 
     @staticmethod
     def _check_win(board: Board, coords: Row) -> bool:
@@ -76,19 +90,23 @@ class TicTacToe:
         return None
 
     def get_winner(self) -> int | None:
-        """P1 plays with 'x'
-        P2 plays with 'o'
-        """
         path = self._get_win_path()
         if not path:
             return None
 
         symbol: Turn | None = self.state.board[path[0][0]][path[0][1]]
-        assert symbol is not None
+        assert symbol is not None  # guaranteed by self._get_win_path
         return self.state.players[symbol]
 
+    def is_draw(self) -> bool:
+        for row in self.state.board:
+            for value in row:
+                if value is None:
+                    return False
+        return True
+
     def is_move_possible(self, move: Move) -> bool:
-        if self.get_winner() is not None:
+        if self.is_draw() or self.get_winner() is not None:
             return False
 
         if self.state.current_player != move.turn:
@@ -101,7 +119,20 @@ class TicTacToe:
             raise InvalidMoveError('Move is invalid')
 
         self.state.board[move.coordinate[0]][move.coordinate[1]] = move.turn
-        if move.turn == 'x':
-            self.state.current_player = 'o'
-        else:
-            self.state.current_player = 'x'
+        next_player: dict[Turn, Turn] = {'x': 'o', 'o': 'x'}
+        self.state.current_player = next_player[move.turn]
+
+    def get_player_view(self, player_id: int) -> TicTacToePlayerView:
+        symbol: Turn = next(
+            turn for turn, pid in self.state.players.items() if pid == player_id
+        )
+        return TicTacToePlayerView(
+            board=self.state.board,
+            your_symbol=symbol,
+            your_turn=self.state.current_player == symbol,
+            winner=self.get_winner(),
+            is_draw=self.is_draw(),
+        )
+
+    def is_game_over(self) -> bool:
+        return self.is_draw() or bool(self.get_winner())

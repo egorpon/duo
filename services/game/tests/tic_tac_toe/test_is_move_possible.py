@@ -1,11 +1,11 @@
-from services.game.engines.tic_tac_toe import GameState, Move, TicTacToe
+from services.game.engines.tic_tac_toe import Move, TicTacToe, TicTacToeState
 
 P1 = 1
 P2 = 2
 
 
 def test_valid_move():
-    state = GameState(
+    state = TicTacToeState(
         current_player='x',
         players={'x': P1, 'o': P2},
         board=[
@@ -20,7 +20,7 @@ def test_valid_move():
 
 
 def test_wrong_player_making_turn():
-    state = GameState(
+    state = TicTacToeState(
         current_player='x',
         players={'x': P1, 'o': P2},
         board=[
@@ -35,7 +35,7 @@ def test_wrong_player_making_turn():
 
 
 def test_place_already_taken():
-    state = GameState(
+    state = TicTacToeState(
         current_player='o',
         players={'x': P1, 'o': P2},
         board=[
@@ -50,7 +50,7 @@ def test_place_already_taken():
 
 
 def test_already_won():
-    state = GameState(
+    state = TicTacToeState(
         current_player='o',
         players={'x': P1, 'o': P2},
         board=[

@@ -1,11 +1,11 @@
-from services.game.engines.tic_tac_toe import GameState, TicTacToe
+from services.game.engines.tic_tac_toe import TicTacToe, TicTacToeState
 
 P1 = 1
 P2 = 2
 
 
 def test_empty_board():
-    state = GameState(
+    state = TicTacToeState(
         current_player='x',
         players={'x': P1, 'o': P2},
         board=[
@@ -20,7 +20,7 @@ def test_empty_board():
 
 
 def test_winner_is_p1():
-    state = GameState(
+    state = TicTacToeState(
         current_player='x',
         players={'x': P1, 'o': P2},
         board=[
@@ -35,7 +35,7 @@ def test_winner_is_p1():
 
 
 def test_winner_is_p2():
-    state = GameState(
+    state = TicTacToeState(
         current_player='x',
         players={'x': P1, 'o': P2},
         board=[

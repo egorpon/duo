@@ -99,6 +99,9 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
         return self.state.players[symbol]
 
     def is_draw(self) -> bool:
+        if self.get_winner() is not None:
+            return False
+
         for row in self.state.board:
             for value in row:
                 if value is None:
@@ -106,7 +109,7 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
         return True
 
     def is_move_possible(self, move: Move) -> bool:
-        if self.is_draw() or self.get_winner() is not None:
+        if self.is_game_over():
             return False
 
         if self.state.current_player != move.turn:
@@ -133,6 +136,3 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
             winner=self.get_winner(),
             is_draw=self.is_draw(),
         )
-
-    def is_game_over(self) -> bool:
-        return self.is_draw() or bool(self.get_winner())

@@ -1,0 +1,60 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Commands
+
+All tasks use `just` (justfile task runner):
+
+```bash
+just check           # format + type-check + test
+just format          # ruff format + auto-fix
+just lint            # ruff lint
+just type-check      # basedpyright strict
+
+just test            # pytest
+just test-cov        # pytest with coverage
+
+just run api         # FastAPI on :8000 (uvicorn --reload)
+just run auth        # Auth gRPC service
+just run game        # Game gRPC service
+just ui              # Vue dev server
+
+just make-migrations auth   # alembic autogenerate
+just apply-migrations auth  # alembic upgrade head
+just connect-to-db auth     # psql into db
+
+just generate-proto  # regenerate gRPC code from .proto files
+just clean           # remove __pycache__
+```
+
+Run a single test file: `pytest services/game/tests/tic_tac_toe/`
+
+## Architecture
+
+Three microservices + one frontend:
+
+```
+UI (Vue 3) → API (FastAPI :8000) → Auth (gRPC :50051)
+                                 → Game (gRPC, not yet running)
+```
+
+- **`services/api/`** — REST gateway. Exposes `/api/v1/auth/`, `/api/v1/users/`, and `/api/v1/ws` (WebSocket). Proxies to Auth via gRPC stub in `dependencies.py`.
+- **`services/auth/`** — gRPC UserService. JWT with Ed25519 keys (in `services/auth/keys/`), Argon2 passwords, PostgreSQL on :25432.
+- **`services/game/`** — gRPC GameService (WIP, `__main__.py` not implemented). Contains game engine abstraction and Tic Tac Toe logic. PostgreSQL on :25433.
+- **`services/ui/`** — Vue 3 + Vite + Pinia + TypeScript frontend.
+- **`common/`** — Shared Python utilities (logging, secrets, tokens, models).
+- **`proto/`** — Source `.proto` files. Generated output goes to `generated/`.
+
+## Game Engine Pattern
+
+`services/game/engines/base.py` defines `GameEngine[TState, TMove, TPlayerView]` — a generic abstract base. New games subclass it and implement `get_winner`, `is_draw`, `is_move_possible`, `make_move`, `get_player_view`.
+
+`TicTacToe` in `engines/tic_tac_toe.py` is the reference implementation.
+
+## Code Standards
+
+- Python 3.14+, strict basedpyright, ruff (80 char lines, single quotes)
+- Pytest markers: `unit`, `integration`, `e2e`, `slow`
+- gRPC generated code lives in `generated/` — do not edit manually, regenerate with `just generate-proto`
+- Docker infra per service: `services/<name>/infra.yaml`, composed via root `compose.yaml`

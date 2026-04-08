@@ -55,6 +55,10 @@ make-migrations APP:
 apply-migrations APP:
     {{venv}}/alembic -c ./services/{{APP}}/alembic.ini upgrade head
 
+# options: auth, game
+rollback APP:
+    {{venv}}/alembic -c ./services/{{APP}}/alembic.ini downgrade base
+
 
 # options: auth, game
 connect-to-db APP:

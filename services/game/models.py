@@ -48,4 +48,12 @@ class GameMove(TimeStampedModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
 
     game_id: int = Field(foreign_key='game.id', nullable=False)
+
+    player_id: int = Field(gt=0)
+    turn_number: int = Field(gt=0)
+
+    move_data: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+
     game: Game = Relationship(back_populates='moves')

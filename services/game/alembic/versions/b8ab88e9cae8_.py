@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5a7c4239b6f1
+Revision ID: b8ab88e9cae8
 Revises: 
-Create Date: 2026-03-22 21:38:55.741529
+Create Date: 2026-04-08 21:51:18.924098
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5a7c4239b6f1'
+revision: str = 'b8ab88e9cae8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -44,6 +44,9 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('game_id', sa.Integer(), nullable=False),
+    sa.Column('player_id', sa.Integer(), nullable=False),
+    sa.Column('turn_number', sa.Integer(), nullable=False),
+    sa.Column('move_data', sa.JSON(), nullable=True),
     sa.ForeignKeyConstraint(['game_id'], ['game.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

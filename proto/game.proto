@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package game.v1;
+
+import "google/protobuf/timestamp.proto";
+
+enum GameType {
+  TIC_TAC_TOE = 0;
+}
+
+enum GameResult {
+  TBD = 0;
+  DRAW = 1;
+  P1_WON = 2;
+  P2_WON = 3;
+}
+
+enum GameStatus {
+  IN_QUEUE = 0;
+  IN_PROGRESS = 1;
+  ABANDONED = 2;
+  FINISHED = 3;
+}
+
+
+message CreateGameRequest {
+  GameType type = 1;
+  int32 player1 = 2;
+  optional int32 player2 = 3;
+}
+
+message Game {
+  int32 id = 1;
+
+  GameType type = 2;
+  GameResult result = 3;
+  GameStatus status = 4;
+
+  int32 player1 = 5;
+  optional int32 player2 = 6;
+  optional int32 current_player = 7;
+
+  int32 turn_number = 8;
+
+  google.protobuf.Timestamp created_at = 100;
+  google.protobuf.Timestamp updated_at = 101;
+}
+
+message JoinGameRequest {
+  int32 game_id = 1;
+  int32 player_id = 2;
+}
+
+message JoinGameResponse {
+  Game game = 1;
+  string player1_view = 2;
+  string player2_view = 3;
+}
+
+message MakeGameAbandonedRequest {
+  int32 game_id = 1;
+}
+
+message GetGameByIdRequest {
+  int32 game_id = 1;
+}
+
+message MakeMoveRequest {
+  int32 game_id = 1;
+  int32 player_id = 2;
+  string move_data = 3;
+}
+
+message MakeMoveResponse {
+  Game game = 1;
+  string player1_view = 2;
+  string player2_view = 3;
+}
+
+message GetPlayerViewRequest {
+  int32 game_id = 1;
+  int32 player_id = 2;
+}
+
+message GamePlayerView {
+  string game_state = 1;
+}
+
+service GameService {
+  rpc CreateGame (CreateGameRequest) returns (Game);
+  rpc JoinGame (JoinGameRequest) returns (JoinGameResponse);
+  rpc MakeGameAbandoned (MakeGameAbandonedRequest) returns (Game);
+  rpc GetGameById (GetGameByIdRequest) returns (Game);
+  rpc MakeMove (MakeMoveRequest) returns (MakeMoveResponse);
+  rpc GetPlayerView (GetPlayerViewRequest) returns (GamePlayerView);
+}
+
+
+message GetMoveByIdRequest {
+  int32 move_id = 1;
+}
+
+message GameMove {
+  int32 id = 1;
+  int32 game_id = 2;
+  int32 player_id = 3;
+
+  int32 turn_number = 4;
+  string move_data = 5;
+
+  google.protobuf.Timestamp created_at = 100;
+  google.protobuf.Timestamp updated_at = 101;
+}
+
+message GetMovesForGameRequest {
+  int32 game_id = 1;
+}
+
+message ListMoveResponse {
+  repeated GameMove moves = 1;
+}
+
+service GameMoveService {
+  rpc GetMoveById (GetMoveByIdRequest) returns (GameMove);
+  rpc GetMovesForGame (GetMovesForGameRequest) returns (ListMoveResponse);
+}

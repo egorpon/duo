@@ -33,8 +33,8 @@ class Game(TimeStampedModel, table=True):
     status: Status = Field(default=Status.IN_QUEUE, max_length=16)
 
     player1: int = Field(index=True, gt=0)
-    player2: int = Field(index=True, gt=0)
-    current_player: int = Field(
+    player2: int | None = Field(index=True, default=None)
+    current_player: int | None = Field(
         description='ID of a player that should perform a move'
     )
 

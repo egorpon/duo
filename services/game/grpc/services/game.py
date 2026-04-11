@@ -181,4 +181,21 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         self,
         request: game_pb2.GetPlayerViewRequest,
         context: ServicerContext[Any, Any],
-    ) -> game_pb2.GamePlayerView: ...
+    ) -> game_pb2.GamePlayerView:
+        game = await get_game_by_id(id=request.game_id)
+        if game is None:
+            await context.abort(
+                code=StatusCode.NOT_FOUND,
+                details=f'Not found game with id {request.game_id}',
+            )
+
+        if request.player_id not in [game.player1, game.player2]:
+            await context.abort(
+                code=StatusCode.INVALID_ARGUMENT,
+                details=f'player {request.player_id} not in the game {game.id}',
+            )
+
+        engine = get_game_engine(game).load_game(game.state)
+        return game_pb2.GamePlayerView(
+            game_state=engine.get_player_view(request.player_id)
+        )

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, field_validator
 
@@ -82,6 +82,10 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
                 board=make_board(),
             )
         )
+
+    @classmethod
+    def load_game(cls, state: dict[str, Any]):
+        return cls(state=TicTacToeState.model_validate(state))
 
     @staticmethod
     def _check_win(board: Board, coords: Row) -> bool:

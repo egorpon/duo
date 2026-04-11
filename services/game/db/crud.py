@@ -1,7 +1,11 @@
+from collections.abc import Sequence
 from typing import Any
 
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from common.models import model_update
+from services.game.db.engine import get_session_ctx
 from services.game.db.models import Game, GameMove
 
 
@@ -10,7 +14,9 @@ async def get_game_by_id(
     *,
     id: int,
 ) -> Game | None:
-    pass
+    async with get_session_ctx(session=session) as s:
+        query = select(Game).where(Game.id == id)
+        return (await s.exec(query)).first()
 
 
 async def game_create(  # noqa: PLR0913
@@ -24,7 +30,24 @@ async def game_create(  # noqa: PLR0913
     current_player: int | None = None,
     turn_number: int = 0,
     state: dict[str, Any] | None = None,
-) -> Game: ...
+) -> Game:
+    if state is None:
+        state = dict()
+    async with get_session_ctx(session) as s:
+        game = Game(
+            type=type,
+            result=result,
+            status=status,
+            player1=player1,
+            player2=player2,
+            current_player=current_player,
+            turn_number=turn_number,
+            state=state,
+        )
+        s.add(game)
+        await s.commit()
+        await s.refresh(game)
+        return game
 
 
 async def game_update(
@@ -32,21 +55,36 @@ async def game_update(
     *,
     game: Game,
     **fields: Any,
-) -> Game: ...
+) -> Game:
+    game, updates = model_update(model=game, **fields)
+    if not updates:
+        return game
+
+    async with get_session_ctx(session) as s:
+        s.add(Game)
+        await s.commit()
+        await s.refresh(game)
+        return game
 
 
 async def get_game_move_by_id(
     session: AsyncSession | None = None,
     *,
     id: int,
-) -> GameMove | None: ...
+) -> GameMove | None:
+    async with get_session_ctx(session=session) as s:
+        query = select(GameMove).where(GameMove.id == id)
+        return (await s.exec(query)).first()
 
 
 async def get_game_moves(
     session: AsyncSession | None = None,
     *,
     game_id: int,
-) -> list[GameMove]: ...
+) -> Sequence[GameMove]:
+    async with get_session_ctx(session=session) as s:
+        query = select(GameMove).where(GameMove.game_id == game_id)
+        return (await s.exec(query)).all()
 
 
 async def game_move_create(
@@ -56,4 +94,17 @@ async def game_move_create(
     player_id: int,
     turn_number: int,
     move_data: dict[str, Any] | None = None,
-) -> GameMove: ...
+) -> GameMove:
+    if move_data is None:
+        move_data = dict()
+    async with get_session_ctx(session) as s:
+        move = GameMove(
+            game_id=game_id,
+            player_id=player_id,
+            turn_number=turn_number,
+            move_data=move_data,
+        )
+        s.add(move)
+        await s.commit()
+        await s.refresh(move)
+        return move

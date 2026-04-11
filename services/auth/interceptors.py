@@ -15,7 +15,7 @@ def get_current_user() -> User | None:
     return request_user.get()
 
 
-class AuthInterceptor(grpc.aio.ServerInterceptor):  # type: ignore[misc]
+class AuthInterceptor(grpc.aio.ServerInterceptor):
     @override
     async def intercept_service(
         self,

@@ -39,3 +39,10 @@ class GameEngine(ABC, Generic[TState, TMove, TPlayerView]):
     @classmethod
     @abstractmethod
     def load_game(cls, state: dict[str, Any]) -> Self: ...
+
+    @classmethod
+    @abstractmethod
+    def load_move(cls, move: str) -> TMove: ...
+
+    @abstractmethod
+    def get_current_player(self) -> int: ...

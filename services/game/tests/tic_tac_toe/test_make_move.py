@@ -19,7 +19,7 @@ def test_making_move_updates_state():
     )
 
     engine = TicTacToe(state=state)
-    engine.make_move(Move(turn='x', coordinate=(0, 0)))
+    engine.make_move(Move(coordinate=(0, 0)))
     assert state.current_player == 'o'
     assert state.board[0][0] == 'x'
 
@@ -37,7 +37,7 @@ def test_invalid_move_does_not_change_state():
 
     engine = TicTacToe(state=state)
     with pytest.raises(InvalidMoveError):
-        engine.make_move(Move(turn='o', coordinate=(0, 0)))
+        engine.make_move(Move(coordinate=(0, 0)))
 
     assert state.current_player == 'o'
     assert state.board[0][0] == 'x'
@@ -55,10 +55,10 @@ def test_multiple_moves():
     )
 
     engine = TicTacToe(state=state)
-    engine.make_move(Move(turn='x', coordinate=(0, 0)))
-    engine.make_move(Move(turn='o', coordinate=(1, 1)))
-    engine.make_move(Move(turn='x', coordinate=(2, 2)))
-    engine.make_move(Move(turn='o', coordinate=(1, 0)))
+    engine.make_move(Move(coordinate=(0, 0)))
+    engine.make_move(Move(coordinate=(1, 1)))
+    engine.make_move(Move(coordinate=(2, 2)))
+    engine.make_move(Move(coordinate=(1, 0)))
 
     assert state.current_player == 'x'
     assert state.board[0][0] == 'x'

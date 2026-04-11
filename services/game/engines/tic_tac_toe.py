@@ -34,7 +34,6 @@ def make_board() -> Board:
 
 
 class Move(BaseModel):
-    turn: Turn
     coordinate: Coordinate
 
 
@@ -87,6 +86,10 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
     def load_game(cls, state: dict[str, Any]):
         return cls(state=TicTacToeState.model_validate(state))
 
+    @classmethod
+    def load_move(cls, move: str):
+        return Move.model_validate_json(move)
+
     @staticmethod
     def _check_win(board: Board, coords: Row) -> bool:
         return (
@@ -126,18 +129,17 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
         if self.is_game_over():
             return False
 
-        if self.state.current_player != move.turn:
-            return False
-
         return self.state.board[move.coordinate[0]][move.coordinate[1]] is None
 
     def make_move(self, move: Move) -> None:
         if not self.is_move_possible(move):
             raise InvalidMoveError('Move is invalid')
 
-        self.state.board[move.coordinate[0]][move.coordinate[1]] = move.turn
+        self.state.board[move.coordinate[0]][move.coordinate[1]] = (
+            self.state.current_player
+        )
         next_player: dict[Turn, Turn] = {'x': 'o', 'o': 'x'}
-        self.state.current_player = next_player[move.turn]
+        self.state.current_player = next_player[self.state.current_player]
 
     def get_player_view(self, player_id: int) -> TicTacToePlayerView:
         symbol: Turn = next(
@@ -150,3 +152,6 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
             winner=self.get_winner(),
             is_draw=self.is_draw(),
         )
+
+    def get_current_player(self) -> int:
+        return self.state.players[self.state.current_player]

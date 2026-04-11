@@ -17,10 +17,10 @@ def test_full_game_until_winner():
         )
     )
     assert engine.get_winner() is None
-    engine.make_move(Move(turn='x', coordinate=(1, 1)))
+    engine.make_move(Move(coordinate=(1, 1)))
     assert engine.state.current_player == 'o'
-    engine.make_move(Move(turn='o', coordinate=(1, 0)))
-    engine.make_move(Move(turn='x', coordinate=(0, 0)))
-    engine.make_move(Move(turn='o', coordinate=(1, 2)))
-    engine.make_move(Move(turn='x', coordinate=(2, 2)))
+    engine.make_move(Move(coordinate=(1, 0)))
+    engine.make_move(Move(coordinate=(0, 0)))
+    engine.make_move(Move(coordinate=(1, 2)))
+    engine.make_move(Move(coordinate=(2, 2)))
     assert engine.get_winner() == P1

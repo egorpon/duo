@@ -73,6 +73,16 @@ class TicTacToe(GameEngine[TicTacToeState, Move, TicTacToePlayerView]):
     P2 plays with 'o'
     """
 
+    @classmethod
+    def new_game(cls, p1: int, p2: int):
+        return cls(
+            state=TicTacToeState(
+                current_player='x',
+                players={'x': p1, 'o': p2},
+                board=make_board(),
+            )
+        )
+
     @staticmethod
     def _check_win(board: Board, coords: Row) -> bool:
         return (

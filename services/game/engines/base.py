@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
 from pydantic import BaseModel
 
@@ -31,3 +31,7 @@ class GameEngine(ABC, Generic[TState, TMove, TPlayerView]):
 
     @abstractmethod
     def get_player_view(self, player_id: int) -> TPlayerView: ...
+
+    @classmethod
+    @abstractmethod
+    def new_game(cls, p1: int, p2: int) -> Self: ...

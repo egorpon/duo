@@ -114,14 +114,67 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         self,
         request: game_pb2.GetGameByIdRequest,
         context: ServicerContext[Any, Any],
-    ) -> game_pb2.Game: ...
+    ) -> game_pb2.Game:
+        game = await get_game_by_id(id=request.game_id)
+        if game is None:
+            await context.abort(code=StatusCode.NOT_FOUND)
+        return game_to_proto(game=game)
 
     @override
     async def MakeMove(
         self,
         request: game_pb2.MakeMoveRequest,
         context: ServicerContext[Any, Any],
-    ) -> game_pb2.MakeMoveResponse: ...
+    ) -> game_pb2.MakeMoveResponse:
+        game = await get_game_by_id(id=request.game_id)
+        if game is None:
+            await context.abort(code=StatusCode.NOT_FOUND)
+
+        if game.status != Game.Status.IN_PROGRESS:
+            await context.abort(code=StatusCode.FAILED_PRECONDITION)
+
+        if request.player_id != game.current_player:
+            await context.abort(code=StatusCode.INVALID_ARGUMENT)
+
+        engine_class = get_game_engine(game)
+        move = engine_class.load_move(request.move_data)
+        engine = engine_class.load_game(game.state)
+
+        if not engine.is_move_possible(move):
+            await context.abort(code=StatusCode.INVALID_ARGUMENT)
+
+        engine.make_move(move=move)
+        winner = engine.get_winner()
+        is_draw = engine.is_draw()
+        status = game.status
+        result = game.result
+
+        if is_draw:
+            result = Game.Result.DRAW
+            status = Game.Status.FINISHED
+
+        if winner:
+            status = Game.Status.FINISHED
+            if winner == game.player1:
+                result = Game.Result.P1_WON
+            else:
+                result = Game.Result.P1_WON
+
+        await game_update(
+            game=game,
+            state=engine.state.model_dump(),
+            current_player=engine.get_current_player(),
+            status=status,
+            result=result,
+            turn_number=game.turn_number + 1,
+        )
+
+        assert game.player2 is not None
+        return game_pb2.MakeMoveResponse(
+            game=game_to_proto(game),
+            player1_view=engine.get_player_view(game.player1),
+            player2_view=engine.get_player_view(game.player2),
+        )
 
     @override
     async def GetPlayerView(

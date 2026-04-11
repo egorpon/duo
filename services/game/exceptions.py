@@ -10,4 +10,4 @@ class InvalidMoveError(GameError):
 
 
 class UnsupportedGameTypeError(GameError):
-    '''No engines for that type of game'''
+    """No engines for that type of game"""

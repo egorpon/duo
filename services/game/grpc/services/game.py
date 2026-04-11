@@ -101,7 +101,13 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         self,
         request: game_pb2.MakeGameAbandonedRequest,
         context: ServicerContext[Any, Any],
-    ) -> game_pb2.Game: ...
+    ) -> game_pb2.Game:
+        game = await get_game_by_id(id=request.game_id)
+        if game is None:
+            await context.abort(code=StatusCode.NOT_FOUND)
+
+        game = await game_update(game=game, status=Game.Status.ABANDONED)
+        return game_to_proto(game=game)
 
     @override
     async def GetGameById(

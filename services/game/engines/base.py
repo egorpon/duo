@@ -39,4 +39,3 @@ class GameEngine(ABC, Generic[TState, TMove, TPlayerView]):
     @classmethod
     @abstractmethod
     def load_game(cls, state: dict[str, Any]) -> Self: ...
-

@@ -26,6 +26,7 @@ class GameSettings(BaseSettings):
     db_name: str = Field(alias='postgres_db')
     db_user: str = Field(alias='postgres_user')
     db_pass: SecretStr = Field(alias='postgres_password')
+    jwt_algorithm: str = 'EdDSA'
 
     _public_key: Ed25519PublicKey | None = None
 

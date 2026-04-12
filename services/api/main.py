@@ -29,6 +29,7 @@ app = FastAPI(
     title='Duo API',
     version='v0.0.1',
     root_path='/api/v1',
+    lifespan=lifespan,
 )
 app.include_router(auth_router, prefix='/auth')
 app.include_router(users_router, prefix='/users')

@@ -6,17 +6,17 @@ from generated import auth_pb2_grpc, game_pb2_grpc
 
 
 def get_auth_service_stub(request: Request) -> auth_pb2_grpc.UserServiceStub:
-    return auth_pb2_grpc.UserServiceStub(request.state.auth_channel)
+    return auth_pb2_grpc.UserServiceStub(request.app.state.auth_channel)
 
 
 def get_game_service_stub(request: Request) -> game_pb2_grpc.GameServiceStub:
-    return game_pb2_grpc.GameServiceStub(request.state.game_channel)
+    return game_pb2_grpc.GameServiceStub(request.app.state.game_channel)
 
 
 def get_game_move_service_stub(
     request: Request,
 ) -> game_pb2_grpc.GameMoveServiceStub:
-    return game_pb2_grpc.GameMoveServiceStub(request.state.game_channel)
+    return game_pb2_grpc.GameMoveServiceStub(request.app.state.game_channel)
 
 
 # stub is actually async at runtime, but type checker thins its sync

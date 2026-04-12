@@ -1,2 +1,41 @@
+import asyncio
+import logging
+import signal
+
+from grpc import aio
+
+from generated import game_pb2_grpc
+from services.game.grpc.interceptors import AuthInterceptor
+from services.game.grpc.services.game import GameService
+
+logger = logging.getLogger('duo.game')
+
+
+async def serve() -> None:
+    interceptors = (AuthInterceptor(),)
+    server = aio.server(interceptors=interceptors)
+    game_pb2_grpc.add_GameServiceServicer_to_server(GameService(), server)
+
+    port = server.add_insecure_port('localhost:50052')
+    await server.start()
+    logger.info('running server on port: %s', port)
+
+    stop_event = asyncio.Event()
+
+    def handle_signal():
+        logger.info('Shutdown signal received')
+        stop_event.set()
+
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGTERM, handle_signal)
+    loop.add_signal_handler(signal.SIGINT, handle_signal)
+
+    await stop_event.wait()
+
+    logger.info('Shutting down gracefully')
+    await server.stop(grace=5)
+    logger.info('Shutdown complete')
+
+
 if __name__ == '__main__':
-    print('Game not ready to run yet')
+    asyncio.run(serve())

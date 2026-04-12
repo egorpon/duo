@@ -5,6 +5,7 @@ import signal
 from grpc import aio
 
 from generated import game_pb2_grpc
+from services.game.config import settings
 from services.game.grpc.interceptors import AuthInterceptor
 from services.game.grpc.services.game import GameService
 from services.game.grpc.services.game_move import GameMoveService
@@ -20,7 +21,7 @@ async def serve() -> None:
         GameMoveService(), server
     )
 
-    port = server.add_insecure_port('localhost:50052')
+    port = server.add_insecure_port(settings.server_url)
     await server.start()
     logger.info('running server on port: %s', port)
 

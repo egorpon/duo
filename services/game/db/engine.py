@@ -5,13 +5,15 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from services.game.config import settings
 
+_engine = create_async_engine(str(settings.db_dsn))
 
-def get_db_engine() -> AsyncEngine:
-    return create_async_engine(str(settings.db_dsn))
+
+def get_async_engine() -> AsyncEngine:
+    return _engine
 
 
 def get_async_session() -> AsyncSession:
-    return AsyncSession(get_db_engine())
+    return AsyncSession(get_async_engine())
 
 
 @asynccontextmanager

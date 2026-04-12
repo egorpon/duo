@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
@@ -6,9 +6,13 @@ from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 from common.types.game import Result, Status, Type
 
 
+def dt_factory() -> datetime:
+    return datetime.now(timezone.utc)
+
+
 class TimeStampedModel(SQLModel):
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=dt_factory)
+    updated_at: datetime = Field(default_factory=dt_factory)
 
 
 class Game(TimeStampedModel, table=True):

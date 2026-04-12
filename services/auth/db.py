@@ -8,8 +8,10 @@ from services.auth.config import settings
 
 _engine = create_async_engine(str(settings.db_dsn))
 
+
 def get_async_engine() -> AsyncEngine:
     return _engine
+
 
 def get_async_session() -> AsyncSession:
     return AsyncSession(get_async_engine())

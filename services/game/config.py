@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from pydantic import Field, PostgresDsn, SecretStr, TypeAdapter
+from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from common.secrets import load_public_key
@@ -27,17 +27,24 @@ class GameSettings(BaseSettings):
     db_user: str = Field(alias='postgres_user')
     db_pass: SecretStr = Field(alias='postgres_password')
     jwt_algorithm: str = 'EdDSA'
+    server_url: str = Field(
+        alias='duo_game_server_url',
+        default='localhost:50052',
+    )
 
     _public_key: Ed25519PublicKey | None = None
 
     @property
     def db_dsn(self) -> PostgresDsn:
-        dsn_str = (
-            f'postgresql+asyncpg://'
-            f'{self.db_user}:{self.db_pass.get_secret_value()}@'
-            f'{self.db_host}:{self.db_port}/{self.db_name}'
+        dsn = PostgresDsn.build(
+            scheme='postgresql+asyncpg',
+            username=self.db_user,
+            password=self.db_pass.get_secret_value(),
+            host=self.db_host,
+            port=int(self.db_port),
+            path=self.db_name,
         )
-        return TypeAdapter(PostgresDsn).validate_strings(dsn_str)
+        return dsn
 
     @property
     def public_key(self) -> Ed25519PublicKey:

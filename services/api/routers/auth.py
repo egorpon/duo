@@ -7,6 +7,7 @@ from generated import auth_pb2
 from services.api.dependencies import UserServiceDep
 from services.api.schemas.auth import (
     JsonWebToken,
+    UserLoginRequest,
     UserRegisterRequest,
 )
 
@@ -39,14 +40,14 @@ async def user_register(
                 detail='User already exists',
             )
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail='Failed to register. Try again later',
         )
 
 
 @router.post('/login/')
 async def user_login(
-    data: UserRegisterRequest,
+    data: UserLoginRequest,
     stub: UserServiceDep,
 ) -> JsonWebToken:
     try:
@@ -64,13 +65,12 @@ async def user_login(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code() == StatusCode.INTERNAL:
+        if exc.code() == StatusCode.UNAUTHENTICATED:
             raise HTTPException(
-                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                detail='Internal error',
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail='Invalid email or password',
             )
-
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail='Invalid email or password',
+            detail='Internal error',
         )

@@ -52,7 +52,7 @@ async def game_create(
             )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail='Failed to authorize you',
+            detail='Unexpected error',
         )
 
     return _game_proto_to_response(game)

@@ -2,7 +2,7 @@ from common.exceptions import CommonError
 
 
 class AuthServiceError(CommonError):
-    """Base error class for Auth service exeptions"""
+    """Base error class for Auth service exceptions"""
 
 
 class AuthenticationError(AuthServiceError):
@@ -17,5 +17,5 @@ class EmailAlreadyUsedError(DBError):
     """Raised when email already used by other user"""
 
 
-class UnsupportedGRPSMethodError(AuthServiceError):
+class UnsupportedGRPCMethodError(AuthServiceError):
     pass

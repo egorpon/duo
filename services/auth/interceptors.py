@@ -5,7 +5,7 @@ from typing import Any, override
 import grpc
 
 from common.exceptions import ExpiredTokenError, InvalidTokenError
-from services.auth.exceptions import UnsupportedGRPSMethodError
+from services.auth.exceptions import UnsupportedGRPCMethodError
 from services.auth.models import User
 from services.auth.queries import get_user_from_token
 
@@ -54,4 +54,4 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
                 response_serializer=handler.response_serializer,
             )
 
-        raise UnsupportedGRPSMethodError('Only unary_unary is supported')
+        raise UnsupportedGRPCMethodError('Only unary_unary is supported')

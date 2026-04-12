@@ -13,5 +13,5 @@ class UnsupportedGameTypeError(GameError):
     """No engines for that type of game"""
 
 
-class UnsupportedGRPSMethodError(GameError):
+class UnsupportedGRPCMethodError(GameError):
     pass

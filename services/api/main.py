@@ -3,6 +3,7 @@ from typing import Any
 from fastapi import FastAPI, WebSocket
 
 from services.api.routers.auth import router as auth_router
+from services.api.routers.games import router as games_router
 from services.api.routers.users import router as users_router
 from services.api.websockets import WebSocketsClient
 
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 app.include_router(auth_router, prefix='/auth')
 app.include_router(users_router, prefix='/users')
+app.include_router(games_router, prefix='/games')
 
 
 client = WebSocketsClient()

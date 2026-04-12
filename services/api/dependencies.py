@@ -24,11 +24,11 @@ def get_auth_service_stub() -> auth_pb2_grpc.UserServiceStub:
     return auth_stub
 
 
-def get_game_service_stub() -> game_pb2_grpc.GameServiceAsyncStub:
+def get_game_service_stub() -> game_pb2_grpc.GameServiceStub:
     return game_stub
 
 
-def get_game_move_service_stub() -> game_pb2_grpc.GameMoveServiceAsyncStub:
+def get_game_move_service_stub() -> game_pb2_grpc.GameMoveServiceStub:
     return game_move_stub
 
 

@@ -5,7 +5,7 @@ from grpc import StatusCode
 from grpc.aio import ServicerContext
 
 from common.types.game import (
-    RESULT_TO_RROTO_MAP,
+    RESULT_TO_PROTO_MAP,
     STATUS_TO_PROTO_MAP,
     TYPE_TO_PROTO_MAP,
     Result,
@@ -24,7 +24,7 @@ def game_to_proto(game: Game) -> game_pb2.Game:
     return game_pb2.Game(
         id=game.id,
         type=TYPE_TO_PROTO_MAP[game.type],
-        result=RESULT_TO_RROTO_MAP[game.result],
+        result=RESULT_TO_PROTO_MAP[game.result],
         status=STATUS_TO_PROTO_MAP[game.status],
         player1=game.player1,
         player2=game.player2,

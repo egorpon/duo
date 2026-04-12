@@ -12,7 +12,7 @@ class FilterConfig(BaseModel):
     def level_number(self) -> int:
         level = getattr(logging, self.level, None)
         if not isinstance(level, int):
-            raise ValueError('Invalid Log level provided: %s', self.level)
+            raise ValueError(f'Invalid Log level provided: {self.level}')
         return level
 
 
@@ -25,8 +25,8 @@ class KeywordLevelFilter(logging.Filter):
 
     @override
     def filter(self, record: logging.LogRecord) -> bool | logging.LogRecord:
-        for filter in self.filters:
-            for keyword in filter.keywords:
+        for f in self.filters:
+            for keyword in f.keywords:
                 if record.name.startswith(keyword):
-                    return record.levelno >= filter.level_number
+                    return record.levelno >= f.level_number
         return True

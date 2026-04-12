@@ -25,7 +25,7 @@ TYPE_TO_PROTO_MAP: dict[Type, game_pb2.GameType.ValueType] = {
     Type.TIC_TAC_TOE: game_pb2.TIC_TAC_TOE,
 }
 
-RESULT_TO_RROTO_MAP: dict[Result, game_pb2.GameResult.ValueType] = {
+RESULT_TO_PROTO_MAP: dict[Result, game_pb2.GameResult.ValueType] = {
     Result.TBD: game_pb2.TBD,
     Result.DRAW: game_pb2.DRAW,
     Result.P1_WON: game_pb2.P1_WON,

@@ -7,6 +7,7 @@ from grpc import aio
 from generated import game_pb2_grpc
 from services.game.grpc.interceptors import AuthInterceptor
 from services.game.grpc.services.game import GameService
+from services.game.grpc.services.game_move import GameMoveService
 
 logger = logging.getLogger('duo.game')
 
@@ -15,6 +16,9 @@ async def serve() -> None:
     interceptors = (AuthInterceptor(),)
     server = aio.server(interceptors=interceptors)
     game_pb2_grpc.add_GameServiceServicer_to_server(GameService(), server)
+    game_pb2_grpc.add_GameMoveServiceServicer_to_server(
+        GameMoveService(), server
+    )
 
     port = server.add_insecure_port('localhost:50052')
     await server.start()

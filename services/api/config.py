@@ -14,6 +14,7 @@ class ApiSettings(BaseSettings):
     debug: bool = Field(alias='duo_api_debug')
     allowed_origins: list[AnyHttpUrl] = Field(alias='duo_allowed_origins')
     auth_service_url: AnyUrl = Field(alias='duo_auth_service_url')
+    game_service_url: AnyUrl = Field(alias='duo_game_service_url')
 
 
 settings = ApiSettings()  # pyright: ignore[reportCallIssue]

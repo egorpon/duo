@@ -67,6 +67,9 @@ class GameService(game_pb2_grpc.GameServiceServicer):
                 details=f'Not found game with id {request.game_id}',
             )
 
+        if game.status != Status.IN_QUEUE:
+            await context.abort(code=StatusCode.FAILED_PRECONDITION)
+
         engine = get_game_engine(game=game).new_game(
             p1=game.player1, p2=request.player_id
         )
@@ -136,12 +139,15 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         is_draw = engine.is_draw()
         status = game.status
         result = game.result
+        current_player: int | None = engine.get_current_player()
 
         if is_draw:
             result = Result.DRAW
             status = Status.FINISHED
+            current_player = None
 
         if winner:
+            current_player = None
             status = Status.FINISHED
             if winner == game.player1:
                 result = Result.P1_WON
@@ -151,7 +157,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         game = await game_update(
             game=game,
             state=engine.state.model_dump(),
-            current_player=engine.get_current_player(),
+            current_player=current_player,
             status=status,
             result=result,
             turn_number=game.turn_number + 1,

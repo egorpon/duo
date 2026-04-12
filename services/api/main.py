@@ -1,11 +1,29 @@
+from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI
+from grpc import aio
 
+from services.api.config import settings
 from services.api.routers.auth import router as auth_router
 from services.api.routers.games import router as games_router
 from services.api.routers.users import router as users_router
-from services.api.websockets import WebSocketsClient
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.auth_channel = aio.insecure_channel(
+        str(settings.auth_service_url)
+    )
+    app.state.game_channel = aio.insecure_channel(
+        str(settings.game_service_url)
+    )
+
+    yield
+
+    await app.state.auth_channel.close()
+    await app.state.game_channel.close()
+
 
 app = FastAPI(
     title='Duo API',
@@ -17,25 +35,6 @@ app.include_router(users_router, prefix='/users')
 app.include_router(games_router, prefix='/games')
 
 
-client = WebSocketsClient()
-
-
 @app.get('/', tags=['status'])
 def main() -> dict[str, Any]:
     return {'status': 'ok'}
-
-
-@app.websocket('/ws')
-async def websocket_api(websocket: WebSocket) -> None:
-    await client.connected(websocket)
-    try:
-        await client.notify_all(
-            f'Someone new here. Now us {client.connections}'
-        )
-        while True:
-            await websocket.receive()
-
-    except Exception:
-        await client.disconnected(websocket)
-        await client.notify_all(f'Someone left us. {client.connections} left')
-        return None

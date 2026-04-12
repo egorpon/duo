@@ -1,6 +1,6 @@
 from typing import Any
 
-from common.game import Type
+from common.types.game import Type
 from services.game.db.models import Game
 from services.game.engines.base import GameEngine
 from services.game.engines.tic_tac_toe import TicTacToe

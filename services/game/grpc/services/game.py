@@ -4,39 +4,28 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
-from common.game import Result, Status, Type
+from common.types.game import (
+    RESULT_TO_RROTO_MAP,
+    STATUS_TO_PROTO_MAP,
+    TYPE_TO_PROTO_MAP,
+    Result,
+    Status,
+    Type,
+)
 from generated import game_pb2, game_pb2_grpc
 from services.game.db.crud import game_create, game_update, get_game_by_id
 from services.game.db.models import Game
 from services.game.engines.factory import get_game_engine
 from services.game.grpc.interceptors import get_current_user_id
 
-_TYPE_MAP: dict[Type, game_pb2.GameType.ValueType] = {
-    Type.TIC_TAC_TOE: game_pb2.TIC_TAC_TOE,
-}
-
-_RESULT_MAP: dict[Result, game_pb2.GameResult.ValueType] = {
-    Result.TBD: game_pb2.TBD,
-    Result.DRAW: game_pb2.DRAW,
-    Result.P1_WON: game_pb2.P1_WON,
-    Result.P2_WON: game_pb2.P2_WON,
-}
-
-_STATUS_MAP: dict[Status, game_pb2.GameStatus.ValueType] = {
-    Status.IN_QUEUE: game_pb2.IN_QUEUE,
-    Status.IN_PROGRESS: game_pb2.IN_PROGRESS,
-    Status.ABANDONED: game_pb2.ABANDONED,
-    Status.FINISHED: game_pb2.FINISHED,
-}
-
 
 def game_to_proto(game: Game) -> game_pb2.Game:
     assert game.id is not None
     return game_pb2.Game(
         id=game.id,
-        type=_TYPE_MAP[game.type],
-        result=_RESULT_MAP[game.result],
-        status=_STATUS_MAP[game.status],
+        type=TYPE_TO_PROTO_MAP[game.type],
+        result=RESULT_TO_RROTO_MAP[game.result],
+        status=STATUS_TO_PROTO_MAP[game.status],
         player1=game.player1,
         player2=game.player2,
         current_player=game.current_player,

@@ -4,8 +4,8 @@ from typing import Any
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from common.game import Result, Status, Type
 from common.models import model_update
+from common.types.game import Result, Status, Type
 from services.game.db.engine import get_session_ctx
 from services.game.db.models import Game, GameMove
 

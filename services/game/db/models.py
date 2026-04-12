@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
-from common.game import Result, Status, Type
+from common.types.game import Result, Status, Type
 
 
 class TimeStampedModel(SQLModel):

@@ -62,7 +62,7 @@ async def game_update(
         return game
 
     async with get_session_ctx(session) as s:
-        s.add(Game)
+        s.add(game)
         await s.commit()
         await s.refresh(game)
         return game

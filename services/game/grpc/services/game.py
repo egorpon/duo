@@ -67,7 +67,6 @@ class GameService(game_pb2_grpc.GameServiceServicer):
                 details=f'Not found game with id {request.game_id}',
             )
 
-        assert game.player2 is not None
         engine = get_game_engine(game=game).new_game(
             p1=game.player1, p2=request.player_id
         )
@@ -135,8 +134,8 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         engine.make_move(move=move)
         winner = engine.get_winner()
         is_draw = engine.is_draw()
-        status = Status
-        result = Result
+        status = game.status
+        result = game.result
 
         if is_draw:
             result = Result.DRAW
@@ -147,9 +146,9 @@ class GameService(game_pb2_grpc.GameServiceServicer):
             if winner == game.player1:
                 result = Result.P1_WON
             else:
-                result = Result.P1_WON
+                result = Result.P2_WON
 
-        await game_update(
+        game = await game_update(
             game=game,
             state=engine.state.model_dump(),
             current_player=engine.get_current_player(),

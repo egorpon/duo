@@ -7,6 +7,7 @@ import grpc
 from common.exceptions import ExpiredTokenError, InvalidTokenError
 from common.token import decode_token
 from services.game.config import settings
+from services.game.exceptions import UnsupportedGRPSMethodError
 
 request_user: ContextVar[int | None] = ContextVar('request_user', default=None)
 
@@ -39,7 +40,7 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
         metadata = dict(handler_call_details.invocation_metadata)
         token = str(metadata.get('authorization', ''))
         if not token:
-            return await continuation(handler_call_details)
+            return handler
 
         try:
             user = get_user_from_token(token_raw=token)
@@ -61,4 +62,4 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
                 response_serializer=handler.response_serializer,
             )
 
-        return handler
+        raise UnsupportedGRPSMethodError('Only unary_unary is supported')

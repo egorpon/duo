@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from common.secrets import load_public_key
 
-logger = logging.getLogger('duo.auth.config')
+logger = logging.getLogger('duo.game.config')
 
 BASE_PATH = Path(__file__).parent
 

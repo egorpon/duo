@@ -11,3 +11,7 @@ class InvalidMoveError(GameError):
 
 class UnsupportedGameTypeError(GameError):
     """No engines for that type of game"""
+
+
+class UnsupportedGRPSMethodError(GameError):
+    pass

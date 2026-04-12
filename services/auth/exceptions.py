@@ -15,3 +15,7 @@ class DBError(AuthServiceError):
 
 class EmailAlreadyUsedError(DBError):
     """Raised when email already used by other user"""
+
+
+class UnsupportedGRPSMethodError(AuthServiceError):
+    pass

@@ -1,17 +1,18 @@
 from contextlib import asynccontextmanager
 
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from services.auth.config import settings
 
+_engine = create_async_engine(str(settings.db_dsn))
 
-def get_db_engine() -> AsyncEngine:
-    return create_async_engine(str(settings.db_dsn))
-
+def get_async_engine() -> AsyncEngine:
+    return _engine
 
 def get_async_session() -> AsyncSession:
-    return AsyncSession(get_db_engine())
+    return AsyncSession(get_async_engine())
 
 
 @asynccontextmanager

@@ -5,6 +5,7 @@ import signal
 from grpc import aio
 
 from generated import auth_pb2_grpc
+from services.auth.config import settings
 from services.auth.interceptors import AuthInterceptor
 from services.auth.service import UserService
 
@@ -16,7 +17,7 @@ async def serve() -> None:
     server = aio.server(interceptors=interceptors)
     auth_pb2_grpc.add_UserServiceServicer_to_server(UserService(), server)
 
-    port = server.add_insecure_port('localhost:50051')
+    port = server.add_insecure_port(settings.server_url)
     await server.start()
     logger.info('running server on port: %s', port)
 

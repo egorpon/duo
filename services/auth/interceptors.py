@@ -5,6 +5,7 @@ from typing import Any, override
 import grpc
 
 from common.exceptions import ExpiredTokenError, InvalidTokenError
+from services.auth.exceptions import UnsupportedGRPSMethodError
 from services.auth.models import User
 from services.auth.queries import get_user_from_token
 
@@ -30,13 +31,14 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
         metadata = dict(handler_call_details.invocation_metadata)
         token = str(metadata.get('authorization', ''))
         if not token:
-            return await continuation(handler_call_details)
+            return handler
 
         try:
             user = await get_user_from_token(token=token)
         except (InvalidTokenError, ExpiredTokenError):
             user = None
 
+        # Wraps only unary_unary as it's only used methods
         if handler.unary_unary is not None:
 
             async def new_unary_unary(
@@ -52,4 +54,4 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
                 response_serializer=handler.response_serializer,
             )
 
-        return handler
+        raise UnsupportedGRPSMethodError('Only unary_unary is supported')

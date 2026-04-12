@@ -65,12 +65,6 @@ async def user_create(
     """
     raises `EmailAlreadyUsedError`
     """
-    other_user = await get_user_by_email(session=session, email=email)
-    if other_user:
-        raise EmailAlreadyUsedError(
-            f'Could not create user with email {email}. Already in use'
-        )
-
     try:
         async with get_session_ctx(session=session) as s:
             hashed_password = hash_password(password)

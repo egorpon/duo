@@ -1,3 +1,4 @@
+import logging
 from typing import Any, override
 
 from google.protobuf.empty_pb2 import Empty
@@ -25,6 +26,8 @@ from services.auth.queries import (
     user_update,
 )
 from services.auth.token import issue_token
+
+logger = logging.getLogger('duo.auth.grpc')
 
 
 class UserService(auth_pb2_grpc.UserServiceServicer):
@@ -97,7 +100,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
             await context.abort(
                 code=StatusCode.ALREADY_EXISTS, details='Email already exists'
             )
-        except Exception:
+        except Exception as exc:
+            logger.exception('UpdateUserEmail: Unhandled exception: %s', exc)
             await context.abort(
                 code=StatusCode.INTERNAL, details='Unhandled exception'
             )
@@ -127,7 +131,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         new_password = request.new_password
         try:
             await user_update(user=user, password=new_password)
-        except Exception:
+        except Exception as exc:
+            logger.exception('UpdateUserPassword: unhandled exception: %s', exc)
             await context.abort(
                 code=StatusCode.INTERNAL, details='Unhandled exception'
             )

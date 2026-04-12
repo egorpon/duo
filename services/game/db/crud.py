@@ -4,6 +4,7 @@ from typing import Any
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from common.game import Result, Status, Type
 from common.models import model_update
 from services.game.db.engine import get_session_ctx
 from services.game.db.models import Game, GameMove
@@ -22,9 +23,9 @@ async def get_game_by_id(
 async def game_create(  # noqa: PLR0913
     session: AsyncSession | None = None,
     *,
-    type: Game.Type = Game.Type.TIC_TAC_TOE,
-    result: Game.Result = Game.Result.TBD,
-    status: Game.Status = Game.Status.IN_QUEUE,
+    type: Type = Type.TIC_TAC_TOE,
+    result: Result = Result.TBD,
+    status: Status = Status.IN_QUEUE,
     player1: int,
     player2: int | None = None,
     current_player: int | None = None,

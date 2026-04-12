@@ -1,8 +1,9 @@
 from datetime import datetime
-from enum import Enum
 from typing import Any
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+from common.game import Result, Status, Type
 
 
 class TimeStampedModel(SQLModel):
@@ -11,21 +12,6 @@ class TimeStampedModel(SQLModel):
 
 
 class Game(TimeStampedModel, table=True):
-    class Type(str, Enum):
-        TIC_TAC_TOE = 'tic_tac_toe'
-
-    class Result(str, Enum):
-        TBD = 'tbd'
-        DRAW = 'draw'
-        P1_WON = 'p1_won'
-        P2_WON = 'p2_won'
-
-    class Status(str, Enum):
-        IN_QUEUE = 'in_queue'
-        IN_PROGRESS = 'in_progress'
-        ABANDONED = 'abandoned'
-        FINISHED = 'finished'
-
     id: int | None = Field(default=None, primary_key=True, index=True)
 
     type: Type = Field(default=Type.TIC_TAC_TOE, max_length=16)

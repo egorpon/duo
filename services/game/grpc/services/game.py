@@ -4,28 +4,29 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
+from common.game import Result, Status, Type
 from generated import game_pb2, game_pb2_grpc
 from services.game.db.crud import game_create, game_update, get_game_by_id
 from services.game.db.models import Game
 from services.game.engines.factory import get_game_engine
 from services.game.grpc.interceptors import get_current_user_id
 
-_TYPE_MAP: dict[Game.Type, game_pb2.GameType.ValueType] = {
-    Game.Type.TIC_TAC_TOE: game_pb2.TIC_TAC_TOE,
+_TYPE_MAP: dict[Type, game_pb2.GameType.ValueType] = {
+    Type.TIC_TAC_TOE: game_pb2.TIC_TAC_TOE,
 }
 
-_RESULT_MAP: dict[Game.Result, game_pb2.GameResult.ValueType] = {
-    Game.Result.TBD: game_pb2.TBD,
-    Game.Result.DRAW: game_pb2.DRAW,
-    Game.Result.P1_WON: game_pb2.P1_WON,
-    Game.Result.P2_WON: game_pb2.P2_WON,
+_RESULT_MAP: dict[Result, game_pb2.GameResult.ValueType] = {
+    Result.TBD: game_pb2.TBD,
+    Result.DRAW: game_pb2.DRAW,
+    Result.P1_WON: game_pb2.P1_WON,
+    Result.P2_WON: game_pb2.P2_WON,
 }
 
-_STATUS_MAP: dict[Game.Status, game_pb2.GameStatus.ValueType] = {
-    Game.Status.IN_QUEUE: game_pb2.IN_QUEUE,
-    Game.Status.IN_PROGRESS: game_pb2.IN_PROGRESS,
-    Game.Status.ABANDONED: game_pb2.ABANDONED,
-    Game.Status.FINISHED: game_pb2.FINISHED,
+_STATUS_MAP: dict[Status, game_pb2.GameStatus.ValueType] = {
+    Status.IN_QUEUE: game_pb2.IN_QUEUE,
+    Status.IN_PROGRESS: game_pb2.IN_PROGRESS,
+    Status.ABANDONED: game_pb2.ABANDONED,
+    Status.FINISHED: game_pb2.FINISHED,
 }
 
 
@@ -57,7 +58,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
             await context.abort(code=StatusCode.UNAUTHENTICATED)
 
         game = await game_create(
-            type=Game.Type(request.type),
+            type=Type(request.type),
             player1=user_id,
             current_player=user_id,
             turn_number=1,
@@ -70,7 +71,6 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         request: game_pb2.JoinGameRequest,
         context: ServicerContext[Any, Any],
     ) -> game_pb2.JoinGameResponse:
-        # initialize game state for 2 new players
         game = await get_game_by_id(id=request.game_id)
         if game is None:
             await context.abort(
@@ -85,7 +85,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         game = await game_update(
             game=game,
             player2=request.player_id,
-            status=Game.Status.IN_PROGRESS,
+            status=Status.IN_PROGRESS,
             state=engine.state.model_dump(),
         )
 
@@ -106,7 +106,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         if game is None:
             await context.abort(code=StatusCode.NOT_FOUND)
 
-        game = await game_update(game=game, status=Game.Status.ABANDONED)
+        game = await game_update(game=game, status=Status.ABANDONED)
         return game_to_proto(game=game)
 
     @override
@@ -130,7 +130,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         if game is None:
             await context.abort(code=StatusCode.NOT_FOUND)
 
-        if game.status != Game.Status.IN_PROGRESS:
+        if game.status != Status.IN_PROGRESS:
             await context.abort(code=StatusCode.FAILED_PRECONDITION)
 
         if request.player_id != game.current_player:
@@ -146,19 +146,19 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         engine.make_move(move=move)
         winner = engine.get_winner()
         is_draw = engine.is_draw()
-        status = game.status
-        result = game.result
+        status = Status
+        result = Result
 
         if is_draw:
-            result = Game.Result.DRAW
-            status = Game.Status.FINISHED
+            result = Result.DRAW
+            status = Status.FINISHED
 
         if winner:
-            status = Game.Status.FINISHED
+            status = Status.FINISHED
             if winner == game.player1:
-                result = Game.Result.P1_WON
+                result = Result.P1_WON
             else:
-                result = Game.Result.P1_WON
+                result = Result.P1_WON
 
         await game_update(
             game=game,

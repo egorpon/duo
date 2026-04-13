@@ -9,7 +9,9 @@
         "lint": "eslint .",
         "format": "prettier --write \"**/*.{ts,tsx}\"",
         "typecheck": "tsc --noEmit",
-        "preview": "vite preview"
+        "test": "echo \"No tests configured\"",
+        "preview": "vite preview",
+        "check": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run test"
     },
     "dependencies": {
         "@fontsource-variable/roboto": "^5.2.10",

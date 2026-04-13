@@ -30,8 +30,8 @@ run APP:
     {{venv}}/python -m services.{{APP}}
 
 
-ui:
-    cd ./services/ui/; npm run dev
+ui COMMAND ARGS:
+    cd ./services/ui/; pnpm {{COMMAND}} {{ARGS}}
 
 
 generate-proto:

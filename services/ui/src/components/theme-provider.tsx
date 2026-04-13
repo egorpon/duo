@@ -162,10 +162,10 @@ export function ThemeProvider({
                     currentTheme === "dark"
                         ? "light"
                         : currentTheme === "light"
-                            ? "dark"
-                            : getSystemTheme() === "dark"
-                                ? "light"
-                                : "dark"
+                          ? "dark"
+                          : getSystemTheme() === "dark"
+                            ? "light"
+                            : "dark"
 
                 localStorage.setItem(storageKey, nextTheme)
                 return nextTheme

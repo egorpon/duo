@@ -1,6 +1,6 @@
-import { createBrowserRouter } from "react-router"
+import { createBrowserRouter, redirect } from "react-router"
 import App from "@/App"
-import Error from "@/Error"
+import Error from "@/components/Error"
 import Register from "@/features/auth/Register"
 import Login from "@/features/auth/Login"
 
@@ -19,6 +19,10 @@ const router = createBrowserRouter([
         path: "/auth",
         errorElement: <Error />,
         children: [
+            {
+                index: true,
+                loader: () => redirect("/auth/login"),
+            },
             {
                 path: "register",
                 Component: Register,

@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from grpc import aio
 
 from services.api.config import settings
@@ -30,6 +31,12 @@ app = FastAPI(
     version='v0.0.1',
     root_path='/api/v1',
     lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins,
+    allow_methods="*",
+    allow_headers="*",
 )
 app.include_router(auth_router, prefix='/auth')
 app.include_router(users_router, prefix='/users')

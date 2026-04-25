@@ -66,7 +66,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='User not found',
             )
 
-        assert user is not None
         if not check_password(request.password, user.hashed_password):
             await context.abort(
                 code=StatusCode.INVALID_ARGUMENT,
@@ -93,7 +92,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='Not authenticated',
             )
 
-        assert user is not None
         new_email = request.new_email
         try:
             await user_update(user=user, email=new_email)
@@ -128,7 +126,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='Not authenticated',
             )
 
-        assert user is not None
         new_password = request.new_password
         try:
             await user_update(user=user, password=new_password)
@@ -156,7 +153,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='Not authenticated',
             )
 
-        assert user is not None
         assert user.id is not None
         return User(
             id=user.id,
@@ -176,7 +172,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
                 details='User not found',
             )
 
-        assert user is not None
         assert user.id is not None
         return User(
             id=user.id,

@@ -1,4 +1,5 @@
-import { makeRequest, type ApiResponse } from "@/lib/api"
+import { makeRequest } from "@/lib/api"
+import type { ApiResponse } from "@/types/api"
 import type { JWT } from "@/types/token"
 
 const AuthService = {

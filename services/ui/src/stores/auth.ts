@@ -1,13 +1,14 @@
 import { api } from "@/lib/api"
+import type { JWT } from "@/types/token"
 import type { User } from "@/types/user"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
 interface AuthStore {
-    token: string | null
+    token: JWT | null
     user: User | null
     loading: boolean
-    setToken: (token: string) => void
+    setToken: (token: JWT) => void
     isAuthenticated: () => boolean
     loadUser: () => Promise<void>
     logout: () => void
@@ -19,7 +20,7 @@ const useAuthStore = create<AuthStore>()(
             token: null,
             user: null,
             loading: false,
-            setToken: (token: string) => set({ token }),
+            setToken: (token: JWT) => set({ token }),
             isAuthenticated: () => get().user === null,
             loadUser: async () => {
                 set({ loading: true })

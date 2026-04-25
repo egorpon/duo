@@ -70,6 +70,13 @@ async def user_login(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail='Invalid email or password',
             )
+
+        if exc.code() == StatusCode.INVALID_ARGUMENT:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail='Invalid email or password',
+            )
+
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail='Internal error',

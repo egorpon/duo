@@ -6,19 +6,23 @@ import useAuthStore from "@/stores/auth"
 import { useState } from "react"
 
 function Login() {
-    const [email, setEmail] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
-    const store = useAuthStore();
+    const [email, setEmail] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
+    const store = useAuthStore()
     const handleSubmit = async () => {
-        console.log('submit', email, password)
-        const token = await AuthService.login(email, password)
-        console.log('token:', token)
+        console.log("submit", email, password)
+        const { result: token, error } = await AuthService.login(
+            email,
+            password
+        )
+        console.log("token:", token)
+        console.log("error:", error)
         if (token) {
             store.setToken(token)
         }
     }
     return (
-        <div className="flex w-screen h-screen items-center justify-around">
+        <div className="flex h-screen w-screen items-center justify-around">
             <form className="w-1/5" action={handleSubmit}>
                 <Label>Email</Label>
                 <Input

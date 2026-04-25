@@ -1,13 +1,24 @@
-import { api, makeRequest } from "@/lib/api"
+import { makeRequest, type ApiResponse } from "@/lib/api"
 import type { JWT } from "@/types/token"
 
 const AuthService = {
-    login: async (email: string, password: string): Promise<JWT | null> => {
-        const { result } = await makeRequest<JWT>({ url: "/auth/login/", method: "POST", data: { email, password } })
-        return result
+    login: async (
+        email: string,
+        password: string
+    ): Promise<ApiResponse<JWT>> => {
+        return await makeRequest<JWT>("/auth/login/", {
+            method: "post",
+            body: { email, password },
+        })
     },
-    register: async (email: string, password: string): Promise<JWT> => {
-        return await api<JWT>("/auth/register/", { method: "POST", body: { email, password } })
+    register: async (
+        email: string,
+        password: string
+    ): Promise<ApiResponse<JWT>> => {
+        return await makeRequest<JWT>("/auth/register/", {
+            method: "post",
+            body: { email, password },
+        })
     },
 }
 

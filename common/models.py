@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, NamedTuple, TypeVar
 
 from sqlalchemy import inspect
@@ -45,6 +45,6 @@ def model_update(
         setattr(model, field, new_value)
 
     if hasattr(model, 'updated_at'):
-        model.updated_at = datetime.now(timezone.utc)
+        model.updated_at = datetime.now()
 
     return model, updates

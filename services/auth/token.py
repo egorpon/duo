@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 import jwt
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ class Token(BaseModel):
 
 
 def issue_token(user: User) -> Token:
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now()
     exp = now + timedelta(seconds=settings.jwt_lifetime)
     payload = {
         'sub': str(user.id),

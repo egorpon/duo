@@ -1,9 +1,9 @@
 from typing import Any, override
 
-from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
+from common.proto import datetime_to_timestamp
 from common.types.game import (
     RESULT_TO_PROTO_MAP,
     STATUS_TO_PROTO_MAP,
@@ -30,8 +30,8 @@ def game_to_proto(game: Game) -> game_pb2.Game:
         player2=game.player2,
         current_player=game.current_player,
         turn_number=game.turn_number,
-        created_at=Timestamp().FromDatetime(game.created_at),
-        updated_at=Timestamp().FromDatetime(game.updated_at),
+        created_at=datetime_to_timestamp(game.created_at),
+        updated_at=datetime_to_timestamp(game.updated_at),
     )
 
 

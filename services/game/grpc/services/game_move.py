@@ -1,10 +1,10 @@
 import json
 from typing import Any, override
 
-from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
+from common.proto import datetime_to_timestamp
 from generated import game_pb2, game_pb2_grpc
 from services.game.db.crud import get_game_move_by_id, get_game_moves
 from services.game.db.models import GameMove
@@ -18,8 +18,8 @@ def _game_move_to_proto(move: GameMove) -> game_pb2.GameMove:
         player_id=move.player_id,
         turn_number=move.turn_number,
         move_data=json.dumps(move.move_data),
-        created_at=Timestamp().FromDatetime(move.created_at),
-        updated_at=Timestamp().FromDatetime(move.updated_at),
+        created_at=datetime_to_timestamp(move.created_at),
+        updated_at=datetime_to_timestamp(move.updated_at),
     )
 
 

@@ -6,6 +6,7 @@ from google.protobuf.timestamp_pb2 import Timestamp
 from grpc import StatusCode
 from grpc.aio import ServicerContext
 
+from common.proto import datetime_to_timestamp
 from generated import auth_pb2_grpc
 from generated.auth_pb2 import (
     AuthResponse,
@@ -50,8 +51,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=Timestamp().FromDatetime(token.expires_at),
-            issued_at=Timestamp().FromDatetime(token.issued_at),
+            expires_at=datetime_to_timestamp(token.expires_at),
+            issued_at=datetime_to_timestamp(token.issued_at),
         )
 
     @override
@@ -75,8 +76,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=Timestamp().FromDatetime(token.expires_at),
-            issued_at=Timestamp().FromDatetime(token.issued_at),
+            expires_at=datetime_to_timestamp(token.expires_at),
+            issued_at=datetime_to_timestamp(token.issued_at),
         )
 
     @override
@@ -140,8 +141,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         token = issue_token(user=user)
         return AuthResponse(
             access_token=token.access_token,
-            expires_at=Timestamp().FromDatetime(token.expires_at),
-            issued_at=Timestamp().FromDatetime(token.issued_at),
+            expires_at=datetime_to_timestamp(token.expires_at),
+            issued_at=datetime_to_timestamp(token.issued_at),
         )
 
     @override
@@ -160,8 +161,8 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         return User(
             id=user.id,
             email=user.email,
-            created_at=Timestamp().FromDatetime(user.created_at),
-            updated_at=Timestamp().FromDatetime(user.updated_at),
+            created_at=datetime_to_timestamp(user.created_at),
+            updated_at=datetime_to_timestamp(user.updated_at),
         )
 
     @override
@@ -180,6 +181,6 @@ class UserService(auth_pb2_grpc.UserServiceServicer):
         return User(
             id=user.id,
             email=user.email,
-            created_at=Timestamp().FromDatetime(user.created_at),
-            updated_at=Timestamp().FromDatetime(user.updated_at),
+            created_at=datetime_to_timestamp(user.created_at),
+            updated_at=datetime_to_timestamp(user.updated_at),
         )

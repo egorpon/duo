@@ -15,7 +15,7 @@ const api = ofetch.create({
     onRequest: ({ options }) => {
         const token = useAuthStore.getState().token
         if (token !== null) {
-            options.headers.set("Authorization", `Bearer ${token}`)
+            options.headers.set("Authorization", `Bearer ${token.access_token}`)
         }
     },
     onResponseError: ({ response }) => {

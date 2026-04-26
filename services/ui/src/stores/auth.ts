@@ -1,4 +1,4 @@
-import { api } from "@/lib/api"
+import { UserService } from "@/services/user.service"
 import type { JWT } from "@/types/token"
 import type { User } from "@/types/user"
 import { create } from "zustand"
@@ -24,7 +24,7 @@ const useAuthStore = create<AuthStore>()(
             isAuthenticated: () => get().user === null,
             loadUser: async () => {
                 set({ loading: true })
-                const user = await api<User>("/users/me/")
+                const { result: user } = await UserService.me()
                 set({ loading: false, user })
             },
             logout: () => {

@@ -6,7 +6,7 @@ import useAuthStore from "@/stores/auth"
 import { useState } from "react"
 import { redirect } from "react-router"
 
-function Login() {
+export default function Login() {
     const store = useAuthStore()
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
@@ -44,4 +44,3 @@ function Login() {
     )
 }
 
-export default Login

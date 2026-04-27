@@ -4,12 +4,32 @@ import Error from "@/components/Error"
 import Register from "@/features/auth/Register"
 import Login from "@/features/auth/Login"
 import VerticalLayout from "@/components/layout/VerticalLayout"
+import useAuthStore from "@/stores/auth"
+import { PageLoading } from "@/components/layout/PageLoading"
 
 const router = createBrowserRouter([
     {
         path: "/",
         errorElement: <Error />,
+        hydrateFallbackElement: <PageLoading />,
         Component: VerticalLayout,
+        loader: async () => {
+            if (useAuthStore.getState().isAuthenticated()) {
+                return null
+            }
+
+            if (useAuthStore.getState().token === null) {
+                return redirect("/auth/login/")
+            }
+
+            await useAuthStore.getState().loadUser()
+
+            if (useAuthStore.getState().isAuthenticated()) {
+                return null
+            }
+            useAuthStore.getState().logout()
+            return redirect("/auth/login/")
+        },
         children: [
             {
                 index: true,
@@ -20,6 +40,24 @@ const router = createBrowserRouter([
     {
         path: "/auth",
         errorElement: <Error />,
+        hydrateFallbackElement: <PageLoading />,
+        loader: async () => {
+            if (useAuthStore.getState().isAuthenticated()) {
+                return redirect("/")
+            }
+
+            if (useAuthStore.getState().token === null) {
+                return null
+            }
+
+            await useAuthStore.getState().loadUser()
+
+            if (useAuthStore.getState().isAuthenticated()) {
+                return redirect("/")
+            }
+            useAuthStore.getState().logout()
+            return null
+        },
         children: [
             {
                 index: true,

@@ -4,22 +4,24 @@ import { Label } from "@/components/ui/label"
 import { AuthService } from "@/services/auth.service"
 import useAuthStore from "@/stores/auth"
 import { useState } from "react"
+import { redirect } from "react-router"
 
 function Login() {
+    const store = useAuthStore()
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
-    const store = useAuthStore()
     const handleSubmit = async () => {
-        console.log("submit", email, password)
         const { result: token, error } = await AuthService.login(
             email,
             password
         )
-        console.log("token:", token)
-        console.log("error:", error)
+        if (error) {
+            console.error(error)
+        }
         if (token) {
             store.setToken(token)
         }
+        redirect("/")
     }
     return (
         <div className="flex h-screen w-screen items-center justify-around">

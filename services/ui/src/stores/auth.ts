@@ -21,7 +21,7 @@ const useAuthStore = create<AuthStore>()(
             user: null,
             loading: false,
             setToken: (token: JWT) => set({ token }),
-            isAuthenticated: () => get().user === null,
+            isAuthenticated: () => get().user !== null,
             loadUser: async () => {
                 set({ loading: true })
                 const { result: user } = await UserService.me()

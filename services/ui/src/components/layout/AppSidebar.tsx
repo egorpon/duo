@@ -1,6 +1,7 @@
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -11,8 +12,15 @@ import {
     SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar/hooks"
-import { Home, Info, PanelLeft, Settings } from "lucide-react"
-import { Link } from "react-router"
+import useAuthStore from "@/stores/auth"
+import { Home, Info, PanelLeft, Settings, User2 } from "lucide-react"
+import { Link, useNavigate } from "react-router"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
 
 const items = [
     { title: "Home", url: "/", icon: Home },
@@ -22,6 +30,13 @@ const items = [
 
 export function AppSidebar() {
     const { toggleSidebar } = useSidebar()
+    const user = useAuthStore((s) => s.user)
+    const logout = useAuthStore((s) => s.logout)
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        logout()
+        navigate("/auth/login")
+    }
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader>
@@ -54,6 +69,28 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton>
+                                    <User2 className="size-5 shrink-0" />
+                                    <span>{user?.email}</span>
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="top">
+                                <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={handleLogout}
+                                >
+                                    Logout
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
     )
 }

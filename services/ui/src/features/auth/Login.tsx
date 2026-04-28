@@ -4,9 +4,19 @@ import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { useLogin } from "@/hooks/auth/useLogin"
 import useAuthStore from "@/stores/auth"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router"
+import { z } from "zod"
+
+const LoginSchema = z.object({
+    email: z.email("Invalid email"),
+    password: z.string().min(8, "Password should be longer than 8 characters"),
+})
+
+type LoginInputs = z.infer<typeof LoginSchema>
 
 export default function Login() {
     const setToken = useAuthStore((state) => state.setToken)
@@ -14,11 +24,16 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false)
     const { error, loading, login } = useLogin()
 
-    const handleSubmit = async (formData: FormData) => {
-        const token = await login(
-            formData.get("email") as string,
-            formData.get("password") as string
-        )
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginInputs>({
+        resolver: zodResolver(LoginSchema),
+    })
+
+    const onSubmit = async (data: LoginInputs) => {
+        const token = await login(data.email, data.password)
         if (token) {
             setToken(token)
             navigate("/")
@@ -29,7 +44,7 @@ export default function Login() {
         <div className="flex h-screen w-screen">
             <div className="hidden flex-col items-center justify-center bg-primary px-16 text-primary-foreground lg:flex lg:w-1/2">
                 <div className="max-w-sm">
-                    <div className="mb-8 flex size-14 items-center justify-center rounded-2xl bg-primary-foreground/15 text-3xl font-bold">
+                    <div className="mb-8 flex size-16 items-center justify-center rounded-2xl bg-primary-foreground/15 text-3xl font-bold">
                         D
                     </div>
                     <h1 className="mb-4 text-4xl font-bold tracking-tight">
@@ -52,40 +67,43 @@ export default function Login() {
                         </p>
                     </div>
 
-                    <form action={handleSubmit} className="space-y-4">
-                        <div className="space-y-1.5">
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="space-y-4"
+                    >
+                        <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <div className="relative">
-                                <AtSign className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <AtSign className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
+                                    {...register("email")}
                                     placeholder="you@example.com"
-                                    className="pl-9"
-                                    required
+                                    className="pl-8"
                                     autoComplete="email"
                                 />
                             </div>
+                            {errors.email && (
+                                <p className="text-xs text-destructive">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
 
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
                             <div className="relative">
-                                <Lock className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Lock className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    id="password"
-                                    name="password"
+                                    {...register("password")}
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
-                                    className="pr-9 pl-9"
-                                    required
+                                    className="pr-8 pl-8"
                                     autoComplete="current-password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword((v) => !v)}
-                                    className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                                    className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                                     tabIndex={-1}
                                 >
                                     {showPassword ? (
@@ -95,10 +113,15 @@ export default function Login() {
                                     )}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="text-xs text-destructive">
+                                    {errors.password.message}
+                                </p>
+                            )}
                         </div>
 
                         {error && (
-                            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                            <p className="rounded-md bg-destructive/10 px-4 py-2 text-sm text-destructive">
                                 {error}
                             </p>
                         )}
@@ -114,7 +137,7 @@ export default function Login() {
                         </Button>
                     </form>
 
-                    <p className="mt-6 text-center text-sm text-muted-foreground">
+                    <p className="mt-8 text-center text-sm text-muted-foreground">
                         Don't have an account?{" "}
                         <Link
                             to="/auth/register"

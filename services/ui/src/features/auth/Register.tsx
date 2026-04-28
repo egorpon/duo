@@ -9,7 +9,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router"
 
 export default function Register() {
-    const store = useAuthStore()
+    const setToken = useAuthStore((state) => state.setToken)
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const { error, loading, register } = useRegister()
@@ -20,7 +20,7 @@ export default function Register() {
             formData.get("password") as string
         )
         if (token) {
-            store.setToken(token)
+            setToken(token)
             navigate("/")
         }
     }

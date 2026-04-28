@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { AuthService } from "@/services/auth.service"
+import { useRegister } from "@/hooks/auth/useRegister"
 import useAuthStore from "@/stores/auth"
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
@@ -12,21 +12,13 @@ export default function Register() {
     const store = useAuthStore()
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const { error, loading, register } = useRegister()
 
     const handleSubmit = async (formData: FormData) => {
-        setError(null)
-        setLoading(true)
-        const { result: token, error } = await AuthService.register(
+        const token = await register(
             formData.get("email") as string,
             formData.get("password") as string
         )
-        setLoading(false)
-        if (error) {
-            setError(error || "Invalid credentials")
-            return
-        }
         if (token) {
             store.setToken(token)
             navigate("/")

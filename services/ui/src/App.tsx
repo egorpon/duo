@@ -13,8 +13,8 @@ export default function App() {
                     Logout
                 </Button>
             </div>
-            <div className="font-mono text-xs text-muted-foreground">
-                (Press <kbd>d</kbd> to toggle dark mode)
+            <div className="flex">
+                <Button>Connect to game</Button>
             </div>
         </div>
     )

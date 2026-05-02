@@ -9,6 +9,7 @@ from services.api.config import settings
 from services.api.routers.auth import router as auth_router
 from services.api.routers.games import router as games_router
 from services.api.routers.users import router as users_router
+from services.api.routers.websockets import router as ws_router
 
 
 @asynccontextmanager
@@ -41,6 +42,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix='/auth')
 app.include_router(users_router, prefix='/users')
 app.include_router(games_router, prefix='/games')
+app.include_router(ws_router, prefix='/ws')
 
 
 @app.get('/', tags=['status'])

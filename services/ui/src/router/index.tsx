@@ -1,11 +1,12 @@
-import { createBrowserRouter, redirect } from "react-router"
 import App from "@/App"
 import Error from "@/components/Error"
-import Register from "@/features/auth/Register"
-import Login from "@/features/auth/Login"
-import VerticalLayout from "@/components/layout/VerticalLayout"
-import useAuthStore from "@/stores/auth"
 import { PageLoading } from "@/components/layout/PageLoading"
+import VerticalLayout from "@/components/layout/VerticalLayout"
+import Login from "@/features/auth/Login"
+import Register from "@/features/auth/Register"
+import Settings from "@/features/profile/Settings"
+import useAuthStore from "@/stores/auth"
+import { createBrowserRouter, redirect } from "react-router"
 
 const router = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
                 index: true,
                 Component: App,
             },
+            {
+                path: 'settings',
+                Component: Settings,
+            }
         ],
     },
     {

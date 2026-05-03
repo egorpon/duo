@@ -20,11 +20,10 @@ export default function App() {
         ws.addEventListener("open", () => {
             console.log("ws open")
             if (!token) {
-                console.error('no token, aborting')
+                console.error("no token, aborting")
                 return
             }
             const payload = { token: token.access_token }
-            console.log('sending auth token', payload)
             ws.send(JSON.stringify(payload))
         })
 
@@ -32,22 +31,31 @@ export default function App() {
             console.log("ws closed")
         })
         ws.addEventListener("message", (event: MessageEvent) => {
+            console.log(event)
             setMessages((prev) => [...prev, event.data])
         })
         return () => ws.close()
-    }, [])
+    }, [token])
 
-    const handleClick = () => {
+    const handleMessage = () => {
         if (!wsRef.current) {
             console.log("no current ws", wsRef.current)
             return
         }
-        wsRef.current.send(message)
-        setMessage('')
+        wsRef.current.send(JSON.stringify({ message }))
+        setMessage("")
+    }
+    const handleDisconnect = () => {
+        if (!wsRef.current) {
+            console.log("no current ws", wsRef.current)
+            return
+        }
+        wsRef.current.close()
     }
     return (
         <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-            <Button onClick={handleClick}>Click</Button>
+            <Button onClick={handleMessage}>Message</Button>
+            <Button onClick={handleDisconnect}>Disconnect</Button>
             <Input
                 name="message"
                 value={message}

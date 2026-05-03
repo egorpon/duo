@@ -26,14 +26,30 @@ class WebSocketManager:
         player: int,
         socket: WebSocket,
     ) -> None:
-        if not self.connections.get(game):
+        if game not in self.connections:
             self.connections[game] = {player: socket}
+            return
 
         if len(self.connections[game]) >= MAX_PLAYERS:
             raise Exception('max players, cant connect')
 
-        if not self.connections[game].get(player):
+        if player not in self.connections[game]:
             self.connections[game][player] = socket
+            return
+
+        raise Exception('cannot connect, already connected')
+
+    def _get_opponent(self, game: int, player: int) -> WebSocket | None:
+        if game not in self.connections:
+            return None
+
+        if len(self.connections[game]) < MAX_PLAYERS:
+            return None
+
+        for player_id, websocket in self.connections[game].items():
+            if player_id == player:
+                continue
+            return websocket
 
     def remove_connection(
         self,
@@ -41,37 +57,56 @@ class WebSocketManager:
         game: int,
         player: int,
     ) -> None:
-        pass
+        if game not in self.connections or player not in self.connections[game]:
+            return
 
-    async def send_to_players(
+        self.connections[game].pop(player)
+        if not self.connections[game]:
+            self.connections.pop(game)
+
+    async def message_players(
         self,
         *,
         game: int,
         message: Mapping[str, Any],
     ) -> None:
-        for connection in self.connections:
+        if game not in self.connections:
+            return
+        for player_id, ws in self.connections[game].items():
             try:
-                pass
+                await ws.send_json(message)
             except Exception:
-                logger.exception('failed to send message to %s', connection)
+                logger.exception('failed to send message to %s', player_id)
 
-    async def send_to_player(
+    async def message_player(
         self,
         *,
         game: int,
         player: int,
         message: Mapping[str, Any],
     ) -> None:
-        pass
+        if game not in self.connections or player not in self.connections:
+            return
 
-    async def send_to_opponent(
+        try:
+            await self.connections[game][player].send_json(message)
+        except Exception:
+            logger.exception('failed to send message to %s', player)
+
+    async def message_opponent(
         self,
         *,
         game: int,
         player: int,
         message: Mapping[str, Any],
     ) -> None:
-        pass
+        ws = self._get_opponent(game=game, player=player)
+        if not ws:
+            return
+        try:
+            await ws.send_json(message)
+        except Exception:
+            logger.exception('failed to send message to opponent of %s', player)
 
 
 manager = WebSocketManager()
@@ -86,32 +121,42 @@ async def play_game(
     try:
         await websocket.accept()
         logger.debug('game %s: got connection', game)
+        logger.debug('manager state: %s', manager.connections)
 
         message = await websocket.receive_json()
         if message.get('type') == 'websocket.disconnect':
+            logger.debug('game %s: disconnected', game)
             logger.debug('client disconnected')
             return
 
-        logger.debug('game %s: first message: %s', game, message)
-        token: str = message.get('token', '')
-        if not token:
-            await websocket.close(code=1008, reason='not authenticated')
-            return
-
-        user = get_user_from_token(token)
+        user = get_user_from_token(message.get('token', ''))
         if user is None:
             await websocket.close(code=1008, reason='not authenticated')
             return
 
         logger.debug('game %s: verification passed, user %s', game, user)
         manager.add_connection(game=game, player=user, socket=websocket)
+        await manager.message_opponent(
+            game=game,
+            player=user,
+            message={'message': f'opponent {user} connected'},
+        )
+        logger.debug('added connection %s, %s, %s', game, user, websocket)
         while True:
             logger.debug('game %s: waiting for message', game)
-            data = await websocket.receive()
+            data = await websocket.receive_json()
+
+            if message.get('type') == 'websocket.disconnect':
+                await manager.message_opponent(
+                    game=game, player=user, message={'message': 'opponent left'}
+                )
+                manager.remove_connection(game=game, player=user)
+                logger.debug('game %s: disconnected', game)
+                return
 
             logger.debug('game %s: received message: %s', game, data)
-            text: str = data.get('text', '')
-            await manager.send_to_opponent(
+            text: str = data.get('message', '')
+            await manager.message_opponent(
                 game=game, player=user, message={'message': text}
             )
 
@@ -122,6 +167,6 @@ async def play_game(
     finally:
         if user:
             manager.remove_connection(game=game, player=user)
-            await manager.send_to_opponent(
-                game=game, player=user, message={'message': 'no opponent'}
+            await manager.message_players(
+                game=game, message={'message': f'player {user} disconnected'}
             )

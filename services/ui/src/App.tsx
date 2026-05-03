@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { useEffect, useRef, useState } from "react"
 import { Input } from "./components/ui/input"
+import useAuthStore from "./stores/auth"
 
 const url = "http://localhost:8000/ws/games/1/"
 
@@ -8,6 +9,7 @@ export default function App() {
     const wsRef = useRef<WebSocket | null>(null)
     const [messages, setMessages] = useState<string[]>([])
     const [message, setMessage] = useState<string>("")
+    const token = useAuthStore((state) => state.token)
     useEffect(() => {
         const ws = new WebSocket(url)
         wsRef.current = ws
@@ -17,6 +19,13 @@ export default function App() {
 
         ws.addEventListener("open", () => {
             console.log("ws open")
+            if (!token) {
+                console.error('no token, aborting')
+                return
+            }
+            const payload = { token: token.access_token }
+            console.log('sending auth token', payload)
+            ws.send(JSON.stringify(payload))
         })
 
         ws.addEventListener("close", () => {

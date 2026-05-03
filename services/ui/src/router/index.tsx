@@ -37,9 +37,9 @@ const router = createBrowserRouter([
                 Component: App,
             },
             {
-                path: 'settings',
+                path: "settings",
                 Component: Settings,
-            }
+            },
         ],
     },
     {

@@ -1,30 +1,37 @@
 import { Button } from "@/components/ui/button"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
-const url = 'http://localhost:8000/ws/games/1/'
+const url = "http://localhost:8000/ws/games/1/"
 
 export default function App() {
-    let websocket: WebSocket;
+    const wsRef = useRef<WebSocket | null>(null)
     useEffect(() => {
-        websocket = new WebSocket(url)
+        const ws = new WebSocket(url)
+        wsRef.current = new WebSocket(url)
+        if (wsRef === null) {
+            return
+        }
 
-        websocket.addEventListener('open', () => {
-            console.log('ws open')
+        ws.addEventListener("open", () => {
+            console.log("ws open")
         })
 
-        websocket.addEventListener('close', () => {
-            console.log('ws closed')
+        ws.addEventListener("close", () => {
+            console.log("ws closed")
         })
-        websocket.addEventListener('message', (event: Event) => {
-            console.log('received:', event)
+        ws.addEventListener("message", (event: MessageEvent) => {
+            console.log("received:", event)
         })
         return () => {
-            websocket.close()
+            ws.close()
         }
     }, [])
 
     const handleClick = () => {
-        websocket.send('Hello')
+        if (!wsRef.current) {
+            return
+        }
+        wsRef.current.send("Hello")
     }
     return (
         <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">

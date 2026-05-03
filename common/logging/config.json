@@ -5,6 +5,11 @@
         "simple": {
             "format": "%(asctime)s %(levelname)-8s %(name)s %(message)s",
             "datefmt": "%Y-%m-%dT%H:%M:%S%z"
+        },
+        "color": {
+            "()": "common.logging.formatters.ColorfulFormatter",
+            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S%z"
         }
     },
     "filters": {
@@ -25,7 +30,7 @@
     "handlers": {
         "stdout": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "color",
             "stream": "ext://sys.stdout",
             "filters": ["keyword"]
         }

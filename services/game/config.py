@@ -19,8 +19,6 @@ class GameSettings(BaseSettings):
         extra='ignore',
     )
 
-    public_key_path: Path = Field(alias='duo_auth_public_key_path')
-
     db_host: str = Field(alias='postgres_host')
     db_port: str = Field(alias='postgres_port')
     db_name: str = Field(alias='postgres_db')
@@ -32,6 +30,7 @@ class GameSettings(BaseSettings):
         default='localhost:50052',
     )
 
+    public_key_path: Path = Field(alias='duo_auth_public_key_path')
     _public_key: Ed25519PublicKey | None = None
 
     @property

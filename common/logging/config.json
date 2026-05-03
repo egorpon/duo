@@ -10,7 +10,16 @@
     "filters": {
         "keyword": {
             "()": "common.logging.filters.KeywordLevelFilter",
-            "filters": []
+            "filters": [
+                {
+                    "level": "INFO",
+                    "keywords": ["grpc", "asyncio"]
+                },
+                {
+                    "level": "WARNING",
+                    "keywords": ["uvicorn.error"]
+                }
+            ]
         }
     },
     "handlers": {

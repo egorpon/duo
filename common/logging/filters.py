@@ -1,5 +1,5 @@
 import logging
-from typing import override
+from typing import Any, override
 
 from pydantic import BaseModel
 
@@ -17,9 +17,10 @@ class FilterConfig(BaseModel):
 
 
 class KeywordLevelFilter(logging.Filter):
-    def __init__(self, filters: list[FilterConfig]) -> None:
+    def __init__(self, filters: list[dict[str, Any]]) -> None:
         self.filters = [
-            FilterConfig(keywords=f.keywords, level=f.level) for f in filters
+            FilterConfig(keywords=f['keywords'], level=f['level'])
+            for f in filters
         ]
         super().__init__()
 

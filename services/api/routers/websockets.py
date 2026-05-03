@@ -1,12 +1,29 @@
+import enum
 import logging
 from typing import Any, Mapping, MutableMapping
 
 from fastapi import APIRouter, WebSocket
 from fastapi.websockets import WebSocketDisconnect
+from pydantic import BaseModel
 
 from services.api.token import get_user_from_token
 
 _logger = logging.getLogger('duo.api.websockets')
+
+
+class MessageType(str, enum.Enum):
+    AUTHENTICATED = 'authenticated'
+    GAME_MOVE = 'game_move'
+    GAME_STATE = 'game_state'
+    GAME_CREATED = 'game_created'
+    CONNECTED = 'connected'
+    DISCONNECTED = 'disconnected'
+    INVALID_MOVE = 'invalid_move'
+
+
+class GameMessage(BaseModel):
+    type: MessageType
+    body: dict[str, Any]
 
 
 class GameLoggingAdapter(logging.LoggerAdapter[logging.Logger]):
@@ -145,17 +162,33 @@ async def play_game(
         logger.extra['user'] = user
         logger.debug('user verified')
         manager.add_connection(game=game, player=user, socket=websocket)
+        await manager.message_player(
+            game=game,
+            player=user,
+            message=GameMessage(
+                type=MessageType.AUTHENTICATED,
+                body={'success': True},
+            ).model_dump(mode='json'),
+        )
         await manager.message_opponent(
             game=game,
             player=user,
-            message={'message': f'opponent {user} connected'},
+            message=GameMessage(
+                type=MessageType.CONNECTED,
+                body={'message': f'opponent {user} connected'},
+            ).model_dump(mode='json'),
         )
         while True:
             data = await websocket.receive_json()
             logger.debug('received message: %s', data)
             text: str = data.get('message', '')
             await manager.message_opponent(
-                game=game, player=user, message={'message': text}
+                game=game,
+                player=user,
+                message=GameMessage(
+                    type=MessageType.GAME_MOVE,
+                    body={'message': text},
+                ).model_dump(mode='json'),
             )
 
     except WebSocketDisconnect:
@@ -167,6 +200,9 @@ async def play_game(
             await manager.message_opponent(
                 game=game,
                 player=user,
-                message={'message': f'opponent {user} disconnected'},
+                message=GameMessage(
+                    type=MessageType.DISCONNECTED,
+                    body={'message': f'opponent {user} disconnected'},
+                ).model_dump(mode='json'),
             )
             manager.remove_connection(game=game, player=user)

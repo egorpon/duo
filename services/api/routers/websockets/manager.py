@@ -3,6 +3,7 @@ from typing import Any, MutableMapping
 
 from fastapi import WebSocket
 
+from services.api.exceptions import AlreadyConnectedError, ConnectionLimitError
 from services.api.routers.websockets.types import GameMessage
 
 _logger = logging.getLogger('duo.api.websockets')
@@ -44,13 +45,13 @@ class WebSocketManager:
             return
 
         if len(self.connections[game]) >= MAX_PLAYERS:
-            raise Exception('max players, cant connect')
+            raise ConnectionLimitError('max players, cant connect')
 
         if player not in self.connections[game]:
             self.connections[game][player] = socket
             return
 
-        raise Exception('cannot connect, already connected')
+        raise AlreadyConnectedError('cannot connect, already connected')
 
     def _get_opponent(self, game: int, player: int) -> WebSocket | None:
         if game not in self.connections:

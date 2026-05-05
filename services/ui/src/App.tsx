@@ -2,41 +2,9 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useRef, useState } from "react"
 import { Input } from "./components/ui/input"
 import useAuthStore from "./stores/auth"
-import { z } from "zod"
+import { type GameMessage, GameMessageScheme } from "./types/game"
 
 const url = "http://localhost:8000/ws/games/1/"
-
-const GameMessageScheme = z.discriminatedUnion("type", [
-    z.object({
-        type: z.literal("authenticated"),
-        body: z.object({ success: z.boolean(), message: z.string() }),
-    }),
-    z.object({
-        type: z.literal("game_move"),
-        body: z.object({ game_move: z.record(z.any(), z.any()) }),
-    }),
-    z.object({
-        type: z.literal("game_state"),
-        body: z.object({ game_state: z.record(z.any(), z.any()) }),
-    }),
-    z.object({
-        type: z.literal("game_created"),
-        body: z.object({ message: z.string() }),
-    }),
-    z.object({
-        type: z.literal("connected"),
-        body: z.object({ message: z.string() }),
-    }),
-    z.object({
-        type: z.literal("disconnected"),
-        body: z.object({ message: z.string() }),
-    }),
-    z.object({
-        type: z.literal("invalid_move"),
-        body: z.object({ message: z.string() }),
-    }),
-])
-type GameMessage = z.infer<typeof GameMessageScheme>
 
 export default function App() {
     const wsRef = useRef<WebSocket | null>(null)

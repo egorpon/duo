@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 type GameType = "tic_tac_toe"
 
 type GameResult = "tbd" | "draw" | "p1_won" | "p2_won"
@@ -22,3 +24,51 @@ interface GameCreate {
 }
 
 export type { Game, GameType, GameResult, GameStatus, GameCreate }
+
+export const AuthenticatedMessageScheme = z.object({
+    type: z.literal("authenticated"),
+    body: z.object({ success: z.boolean(), message: z.string() }),
+})
+export const GameMoveMessageScheme = z.object({
+    type: z.literal("game_move"),
+    body: z.object({ game_move: z.record(z.any(), z.any()) }),
+})
+export const GameStateMessageScheme = z.object({
+    type: z.literal("game_state"),
+    body: z.object({ game_state: z.record(z.any(), z.any()) }),
+})
+export const GameCreatedMessageScheme = z.object({
+    type: z.literal("game_created"),
+    body: z.object({ message: z.string() }),
+})
+export const ConnectedMessageScheme = z.object({
+    type: z.literal("connected"),
+    body: z.object({ message: z.string() }),
+})
+export const DisconnectedMessageScheme = z.object({
+    type: z.literal("disconnected"),
+    body: z.object({ message: z.string() }),
+})
+export const InvalidMoveMessageScheme = z.object({
+    type: z.literal("invalid_move"),
+    body: z.object({ message: z.string() }),
+})
+
+export const GameMessageScheme = z.discriminatedUnion("type", [
+    AuthenticatedMessageScheme,
+    GameMoveMessageScheme,
+    GameStateMessageScheme,
+    GameCreatedMessageScheme,
+    ConnectedMessageScheme,
+    DisconnectedMessageScheme,
+    InvalidMoveMessageScheme,
+])
+
+export type AuthenticatedMessage = z.infer<typeof AuthenticatedMessageScheme>
+export type GameMoveMessage = z.infer<typeof GameMoveMessageScheme>
+export type GameStateMessage = z.infer<typeof GameStateMessageScheme>
+export type GameCreatedMessage = z.infer<typeof GameCreatedMessageScheme>
+export type ConnectedMessage = z.infer<typeof ConnectedMessageScheme>
+export type DisconnectedMessage = z.infer<typeof DisconnectedMessageScheme>
+export type InvalidMoveMessage = z.infer<typeof InvalidMoveMessageScheme>
+export type GameMessage = z.infer<typeof GameMessageScheme>

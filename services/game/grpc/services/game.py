@@ -7,10 +7,10 @@ from common.proto import datetime_to_timestamp
 from common.types.game import (
     RESULT_TO_PROTO_MAP,
     STATUS_TO_PROTO_MAP,
+    TYPE_FROM_PROTO_MAP,
     TYPE_TO_PROTO_MAP,
     Result,
     Status,
-    Type,
 )
 from generated import game_pb2, game_pb2_grpc
 from services.game.db.crud import game_create, game_update, get_game_by_id
@@ -47,7 +47,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
             await context.abort(code=StatusCode.UNAUTHENTICATED)
 
         game = await game_create(
-            type=Type(request.type),
+            type=TYPE_FROM_PROTO_MAP[request.type],
             player1=user_id,
             current_player=user_id,
             turn_number=1,
@@ -83,8 +83,8 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         assert game.player2 is not None
         return game_pb2.JoinGameResponse(
             game=game_to_proto(game),
-            player1_view=engine.get_player_view(game.player1),
-            player2_view=engine.get_player_view(game.player2),
+            player1_view=engine.get_player_view(game.player1).model_json_dump(),
+            player2_view=engine.get_player_view(game.player2).model_json_dump(),
         )
 
     @override

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { Input } from "./components/ui/input"
 import useAuthStore from "./stores/auth"
 import { type GameMessage, GameMessageScheme } from "./types/game"
+import type { TokenMessage } from "@/types/game"
 
 const url = "http://localhost:8000/ws/games/1/"
 
@@ -23,7 +24,10 @@ export default function App() {
             if (!token) {
                 return
             }
-            const payload = { token: token.access_token }
+            const payload: TokenMessage = {
+                type: "token",
+                body: { token: token.access_token },
+            }
             ws.send(JSON.stringify(payload))
         })
 

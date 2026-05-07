@@ -25,6 +25,10 @@ interface GameCreate {
 
 export type { Game, GameType, GameResult, GameStatus, GameCreate }
 
+export const TokenMessageScheme = z.object({
+    type: z.literal("token"),
+    body: z.object({ token: z.string() }),
+})
 export const AuthenticatedMessageScheme = z.object({
     type: z.literal("authenticated"),
     body: z.object({ success: z.boolean(), message: z.string() }),
@@ -55,6 +59,7 @@ export const InvalidMoveMessageScheme = z.object({
 })
 
 export const GameMessageScheme = z.discriminatedUnion("type", [
+    TokenMessageScheme,
     AuthenticatedMessageScheme,
     GameMoveMessageScheme,
     GameStateMessageScheme,
@@ -64,6 +69,7 @@ export const GameMessageScheme = z.discriminatedUnion("type", [
     InvalidMoveMessageScheme,
 ])
 
+export type TokenMessage = z.infer<typeof TokenMessageScheme>
 export type AuthenticatedMessage = z.infer<typeof AuthenticatedMessageScheme>
 export type GameMoveMessage = z.infer<typeof GameMoveMessageScheme>
 export type GameStateMessage = z.infer<typeof GameStateMessageScheme>

@@ -10,6 +10,9 @@ from services.api.routers.websockets.types import (
     AuthenticatedMessageBody,
     DisconnectedMessage,
     DisconnectedMessageBody,
+    GameMessage,
+    GameMessageAdapter,
+    MessageType,
 )
 from services.api.token import get_user_from_token
 
@@ -69,21 +72,32 @@ async def play_game(
         await websocket.accept()
         logger.debug('connection accepted')
 
-        message = await websocket.receive_json()
-        user = get_user_from_token(message.get('token', ''))
+        message = GameMessageAdapter.validate_json(
+            await websocket.receive_json()
+        )
+        if message.type != MessageType.TOKEN:
+            await websocket.close(code=1008, reason='not authenticated')
+            return
+
+        user = get_user_from_token(message.body.token)
         if user is None:
             await websocket.close(code=1008, reason='not authenticated')
             return
 
         logger.extra['user'] = user
         logger.debug('user verified')
-        if not game.player2 and user != game.player1:
-            join_result = await game_service.JoinGame(
-                game_pb2.JoinGameRequest(game_id=game_id, player_id=user)
-            )
-            game = join_result.game
 
-        elif game.player2 and user not in [game.player1, game.player2]:
+        is_first_player_connects = game.player1 == user and game.player2 == 0
+        is_second_player_joins = game.player1 != user and game.player2 == 0
+        is_player_reconnected = user in [game.player1, game.player2]
+
+        if not any(
+            [
+                is_first_player_connects,
+                is_second_player_joins,
+                is_player_reconnected,
+            ]
+        ):
             logger.debug('player does not belong to a game')
             await websocket.close()
             return
@@ -97,6 +111,24 @@ async def play_game(
                 ),
             ).model_dump_json(),
         )
+
+        if is_first_player_connects:
+            pass
+
+        elif is_second_player_joins:
+            response = await game_service.JoinGame(
+                game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
+            )
+            game = response.game
+
+        elif is_player_reconnected:
+            pass
+
+        while True:
+            message = GameMessageAdapter.validate_json(
+                await websocket.receive_json()
+            )
+            logger.debug('message received: %s', message)
 
     except WebSocketDisconnect:
         logger.debug('user disconnected')

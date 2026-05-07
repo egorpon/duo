@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 
 
 class MessageType(str, enum.Enum):
+    TOKEN = 'token'
     AUTHENTICATED = 'authenticated'
     GAME_MOVE = 'game_move'
     GAME_STATE = 'game_state'
@@ -41,6 +42,15 @@ class GameStateMessageBody(BaseModel):
 
 class InvalidMoveMessageBody(BaseModel):
     message: str
+
+
+class TokenMessageBody(BaseModel):
+    token: str
+
+
+class TokenMessage(BaseModel):
+    type: Literal[MessageType.TOKEN] = MessageType.TOKEN
+    body: TokenMessageBody
 
 
 class AuthenticatedMessage(BaseModel):
@@ -80,6 +90,7 @@ class InvalidMoveMessage(BaseModel):
 
 GameMessage = Annotated[
     Union[
+        TokenMessage,
         AuthenticatedMessage,
         ConnectedMessage,
         DisconnectedMessage,

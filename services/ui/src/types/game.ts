@@ -39,7 +39,7 @@ export const GameMoveMessageScheme = z.object({
 })
 export const GameStateMessageScheme = z.object({
     type: z.literal("game_state"),
-    body: z.object({ game_state: z.record(z.string(), z.any()) }),
+    body: z.object({ game_state: z.unknown() }),
 })
 export const GameCreatedMessageScheme = z.object({
     type: z.literal("game_created"),
@@ -57,7 +57,6 @@ export const InvalidMoveMessageScheme = z.object({
     type: z.literal("invalid_move"),
     body: z.object({ message: z.string() }),
 })
-
 
 export const GameMessageScheme = z.discriminatedUnion("type", [
     TokenMessageScheme,

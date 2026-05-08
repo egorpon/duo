@@ -4,45 +4,48 @@ import { Input } from "./components/ui/input"
 import useAuthStore from "./stores/auth"
 import { type GameMessage, GameMessageScheme } from "./types/game"
 import type { TokenMessage } from "@/types/game"
+import { TicTacToe } from "./components/games/tic-tac-toe/TicTacToeBoard"
 
 const url = "http://localhost:8000/ws/games/1/"
 
 export default function App() {
-
-    const registerEventListeners = (ws: WebSocket): void => {
-        ws.addEventListener("open", () => {
-            console.log("ws open")
-            if (!token) {
-                return
-            }
-            const payload: TokenMessage = {
-                type: "token",
-                body: { token: token.access_token },
-            }
-            ws.send(JSON.stringify(payload))
-        })
-
-        ws.addEventListener("close", () => {
-            console.log("ws closed")
-        })
-        ws.addEventListener("message", (event: MessageEvent) => {
-            const { success, data } = GameMessageScheme.safeParse(
-                JSON.parse(JSON.parse(event.data))
-            )
-            if (!success) {
-                console.log("Failed to parse incoming message")
-                console.log("message was:", event.data)
-                return
-            }
-            setMessages((prev) => [...prev, data])
-        })
-
-    }
     const wsRef = useRef<WebSocket | null>(null)
     const [messages, setMessages] = useState<GameMessage[]>([])
     const [message, setMessage] = useState<string>("")
     const token = useAuthStore((state) => state.token)
+    const [gameState, setGameState] = useState<any | null>(null)
     useEffect(() => {
+        const registerEventListeners = (ws: WebSocket): void => {
+            ws.addEventListener("open", () => {
+                console.log("ws open")
+                if (!token) {
+                    return
+                }
+                const payload: TokenMessage = {
+                    type: "token",
+                    body: { token: token.access_token },
+                }
+                ws.send(JSON.stringify(payload))
+            })
+
+            ws.addEventListener("close", () => {
+                console.log("ws closed")
+            })
+            ws.addEventListener("message", (event: MessageEvent) => {
+                const { success, data } = GameMessageScheme.safeParse(
+                    JSON.parse(JSON.parse(event.data))
+                )
+                if (!success) {
+                    console.log("Failed to parse incoming message")
+                    console.log("message was:", event.data)
+                    return
+                }
+                if (data!.type === 'game_state') {
+                    setGameState(data.body.game_state)
+                }
+                setMessages((prev) => [...prev, data])
+            })
+        }
         const ws = new WebSocket(url)
         wsRef.current = ws
         if (wsRef === null) {
@@ -84,6 +87,7 @@ export default function App() {
                     </div>
                 ))}
             </div>
+            {gameState && <TicTacToe gameState={gameState} />}
         </div>
     )
 }

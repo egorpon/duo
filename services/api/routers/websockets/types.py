@@ -37,7 +37,7 @@ class GameCreatedMessageBody(BaseModel):
 
 
 class GameStateMessageBody(BaseModel):
-    game_state: Mapping[Any, Any]
+    game_state: Mapping[str, Any]
 
 
 class InvalidMoveMessageBody(BaseModel):

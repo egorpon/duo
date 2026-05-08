@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, MutableMapping
 
@@ -8,10 +9,13 @@ from generated import game_pb2, game_pb2_grpc
 from services.api.routers.websockets.types import (
     AuthenticatedMessage,
     AuthenticatedMessageBody,
+    ConnectedMessage,
+    ConnectedMessageBody,
     DisconnectedMessage,
     DisconnectedMessageBody,
-    GameMessage,
     GameMessageAdapter,
+    GameStateMessage,
+    GameStateMessageBody,
     MessageType,
 )
 from services.api.token import get_user_from_token
@@ -48,7 +52,7 @@ def get_opponent(game: game_pb2.Game, user: int) -> int:
 
 
 @router.websocket('/games/{game_id}/')
-async def play_game(
+async def play_game(  # noqa: PLR0912, PLR0915
     websocket: WebSocket,
     game_id: int,
 ) -> None:
@@ -72,15 +76,17 @@ async def play_game(
         await websocket.accept()
         logger.debug('connection accepted')
 
-        message = GameMessageAdapter.validate_json(
+        message = GameMessageAdapter.validate_python(
             await websocket.receive_json()
         )
         if message.type != MessageType.TOKEN:
+            logger.debug('received message is not token, rejecting')
             await websocket.close(code=1008, reason='not authenticated')
             return
 
         user = get_user_from_token(message.body.token)
         if user is None:
+            logger.debug('token is not valid, rejecting')
             await websocket.close(code=1008, reason='not authenticated')
             return
 
@@ -113,19 +119,45 @@ async def play_game(
         )
 
         if is_first_player_connects:
-            pass
+            logger.debug('first player connected, waiting for second player')
 
         elif is_second_player_joins:
+            logger.debug('second player joins game')
             response = await game_service.JoinGame(
                 game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
             )
             game = response.game
 
         elif is_player_reconnected:
-            pass
+            logger.debug('second player is reconnected, can safely play a game')
+            opponent = get_opponent(game=game, user=user)
+            player_view = await game_service.GetPlayerView(
+                game_pb2.GetPlayerViewRequest(
+                    game_id=game.id, player_id=user
+                )
+            )
+            await connections[user].send_json(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(player_view.game_state)
+                    )
+                ).model_dump_json()
+            )
+            if opponent in connections:
+                await connections[opponent].send_json(
+                    ConnectedMessage(
+                        body=ConnectedMessageBody(
+                            message=f'Opponent {user} connected'
+                        ),
+                    ).model_dump_json()
+                )
+                logger.debug('second player connected')
+            else:
+                logger.debug('player reconnected to empty room')
 
         while True:
-            message = GameMessageAdapter.validate_json(
+            logger.info('waiting for message')
+            message = GameMessageAdapter.validate_python(
                 await websocket.receive_json()
             )
             logger.debug('message received: %s', message)

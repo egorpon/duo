@@ -8,17 +8,8 @@ import type { TokenMessage } from "@/types/game"
 const url = "http://localhost:8000/ws/games/1/"
 
 export default function App() {
-    const wsRef = useRef<WebSocket | null>(null)
-    const [messages, setMessages] = useState<GameMessage[]>([])
-    const [message, setMessage] = useState<string>("")
-    const token = useAuthStore((state) => state.token)
-    useEffect(() => {
-        const ws = new WebSocket(url)
-        wsRef.current = ws
-        if (wsRef === null) {
-            return
-        }
 
+    const registerEventListeners = (ws: WebSocket): void => {
         ws.addEventListener("open", () => {
             console.log("ws open")
             if (!token) {
@@ -40,10 +31,25 @@ export default function App() {
             )
             if (!success) {
                 console.log("Failed to parse incoming message")
+                console.log("message was:", event.data)
                 return
             }
             setMessages((prev) => [...prev, data])
         })
+
+    }
+    const wsRef = useRef<WebSocket | null>(null)
+    const [messages, setMessages] = useState<GameMessage[]>([])
+    const [message, setMessage] = useState<string>("")
+    const token = useAuthStore((state) => state.token)
+    useEffect(() => {
+        const ws = new WebSocket(url)
+        wsRef.current = ws
+        if (wsRef === null) {
+            return
+        }
+        registerEventListeners(ws)
+
         return () => ws.close()
     }, [token])
 

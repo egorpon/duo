@@ -15,7 +15,7 @@ from common.types.game import (
 from generated import game_pb2, game_pb2_grpc
 from services.game.db.crud import game_create, game_update, get_game_by_id
 from services.game.db.models import Game
-from services.game.engines.factory import get_game_engine
+from services.game.engines.factory import get_game_engine_class
 from services.game.grpc.interceptors import get_current_user_id
 
 
@@ -70,21 +70,21 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         if game.status != Status.IN_QUEUE:
             await context.abort(code=StatusCode.FAILED_PRECONDITION)
 
-        engine = get_game_engine(game=game).new_game(
+        engine = get_game_engine_class(game.type).new_game(
             p1=game.player1, p2=request.player_id
         )
         game = await game_update(
             game=game,
             player2=request.player_id,
             status=Status.IN_PROGRESS,
-            state=engine.state.model_dump(),
+            state=engine.state.model_dump_json(),
         )
 
         assert game.player2 is not None
         return game_pb2.JoinGameResponse(
             game=game_to_proto(game),
-            player1_view=engine.get_player_view(game.player1).model_json_dump(),
-            player2_view=engine.get_player_view(game.player2).model_json_dump(),
+            player1_view=engine.get_player_view(game.player1).model_dump_json(),
+            player2_view=engine.get_player_view(game.player2).model_dump_json(),
         )
 
     @override
@@ -127,7 +127,8 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         if request.player_id != game.current_player:
             await context.abort(code=StatusCode.INVALID_ARGUMENT)
 
-        engine_class = get_game_engine(game)
+        engine_class = get_game_engine_class(game.type)
+
         move = engine_class.load_move(request.move_data)
         engine = engine_class.load_game(game.state)
 
@@ -166,8 +167,8 @@ class GameService(game_pb2_grpc.GameServiceServicer):
         assert game.player2 is not None
         return game_pb2.MakeMoveResponse(
             game=game_to_proto(game),
-            player1_view=engine.get_player_view(game.player1),
-            player2_view=engine.get_player_view(game.player2),
+            player1_view=engine.get_player_view(game.player1).model_dump_json(),
+            player2_view=engine.get_player_view(game.player2).model_dump_json(),
         )
 
     @override
@@ -189,7 +190,9 @@ class GameService(game_pb2_grpc.GameServiceServicer):
                 details=f'player {request.player_id} not in the game {game.id}',
             )
 
-        engine = get_game_engine(game).load_game(game.state)
+        engine = get_game_engine_class(game.type).load_game(game.state)
         return game_pb2.GamePlayerView(
-            game_state=engine.get_player_view(request.player_id)
+            game_state=engine.get_player_view(
+                request.player_id
+            ).model_dump_json()
         )

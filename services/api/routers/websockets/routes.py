@@ -16,6 +16,8 @@ from services.api.routers.websockets.types import (
     GameMessageAdapter,
     GameStateMessage,
     GameStateMessageBody,
+    InvalidMoveMessage,
+    InvalidMoveMessageBody,
     MessageType,
 )
 from services.api.token import get_user_from_token
@@ -159,6 +161,35 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 await websocket.receive_json()
             )
             logger.debug('message received: %s', message)
+            if message.type != MessageType.GAME_MOVE:
+                await websocket.send_json(
+                    InvalidMoveMessage(
+                        body=InvalidMoveMessageBody(message='invalid move')
+                    )
+                )
+                continue
+            move_response = await game_service.MakeMove(
+                game_pb2.MakeMoveRequest(
+                    game_id=game_id,
+                    player_id=user,
+                    move_data=json.dumps(message.body.game_move),
+                )
+            )
+            game = move_response.game
+            await connections[game.player1].send_json(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(move_response.player1_view)
+                    )
+                ).model_dump_json()
+            )
+            await connections[game.player2].send_json(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(move_response.player2_view)
+                    )
+                ).model_dump_json()
+            )
 
     except WebSocketDisconnect:
         logger.debug('user disconnected')

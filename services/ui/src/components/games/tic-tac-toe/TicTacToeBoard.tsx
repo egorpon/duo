@@ -34,7 +34,7 @@ export function TicTacToe({ gameState, sendMoveHandler }: Props) {
             <div>Your turn? {state.your_turn ? "yes" : "no"}</div>
             <div>Your symbol: {state.your_symbol}</div>
             <div>Is draw?: {state.is_draw ? "yes" : "no"}</div>
-            <div>Winner: {state.winner ? "no winner" : state.winner}</div>
+            <div>Winner: {state.winner ? state.winner : "no winner"}</div>
             <div>Board: ...</div>
             <div>
                 {state.board.map((row, i) => (

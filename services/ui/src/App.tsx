@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { useEffect, useRef, useState } from "react"
-import { Input } from "./components/ui/input"
 import useAuthStore from "./stores/auth"
 import { type GameMessage, GameMessageScheme } from "./types/game"
-import type { TokenMessage } from "@/types/game"
+import type { TokenMessage, GameMoveMessage } from "@/types/game"
 import { TicTacToe } from "./components/games/tic-tac-toe/TicTacToeBoard"
 
 const url = "http://localhost:8000/ws/games/1/"
@@ -11,7 +10,6 @@ const url = "http://localhost:8000/ws/games/1/"
 export default function App() {
     const wsRef = useRef<WebSocket | null>(null)
     const [messages, setMessages] = useState<GameMessage[]>([])
-    const [message, setMessage] = useState<string>("")
     const token = useAuthStore((state) => state.token)
     const [gameState, setGameState] = useState<any | null>(null)
     useEffect(() => {
@@ -40,7 +38,7 @@ export default function App() {
                     console.log("message was:", event.data)
                     return
                 }
-                if (data!.type === 'game_state') {
+                if (data!.type === "game_state") {
                     setGameState(data.body.game_state)
                 }
                 setMessages((prev) => [...prev, data])
@@ -56,14 +54,6 @@ export default function App() {
         return () => ws.close()
     }, [token])
 
-    const handleMessage = () => {
-        if (!wsRef.current) {
-            console.log("no current ws", wsRef.current)
-            return
-        }
-        wsRef.current.send(JSON.stringify({ message }))
-        setMessage("")
-    }
     const handleDisconnect = () => {
         if (!wsRef.current) {
             console.log("no current ws", wsRef.current)
@@ -71,15 +61,21 @@ export default function App() {
         }
         wsRef.current.close()
     }
+    const handleSendMove = (message: GameMoveMessage) => {
+        if (!wsRef.current) {
+            return
+        }
+        wsRef.current.send(JSON.stringify(message))
+    }
     return (
         <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-            <Button onClick={handleMessage}>Message</Button>
             <Button onClick={handleDisconnect}>Disconnect</Button>
-            <Input
-                name="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-            />
+            {gameState && (
+                <TicTacToe
+                    sendMoveHandler={handleSendMove}
+                    gameState={gameState}
+                />
+            )}
             <div>
                 {messages.map((row, idx) => (
                     <div key={idx}>
@@ -87,7 +83,6 @@ export default function App() {
                     </div>
                 ))}
             </div>
-            {gameState && <TicTacToe gameState={gameState} />}
         </div>
     )
 }

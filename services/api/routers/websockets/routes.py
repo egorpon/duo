@@ -132,9 +132,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
             logger.debug('second player is reconnected, can safely play a game')
             opponent = get_opponent(game=game, user=user)
             player_view = await game_service.GetPlayerView(
-                game_pb2.GetPlayerViewRequest(
-                    game_id=game.id, player_id=user
-                )
+                game_pb2.GetPlayerViewRequest(game_id=game.id, player_id=user)
             )
             await connections[user].send_json(
                 GameStateMessage(

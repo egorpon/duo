@@ -1,63 +1,21 @@
 import { TicTacToe } from "@/features/games/components/tic-tac-toe/TicTacToe"
 import { useFetchGame } from "@/features/games/hooks/useFetchGame"
+import { useGameWebSocket } from "@/features/games/hooks/useGameWebSocket"
 import useAuthStore from "@/features/auth/stores/auth"
-import type {
-    Game,
-    GameMoveMessage,
-    TokenMessage,
-} from "@/features/games/types/game"
-import { GameMessageScheme } from "@/features/games/types/game"
-import { useEffect, useRef, useState } from "react"
+import { PageLoading } from "@/shared/components/layout/PageLoading"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router"
-import { toast } from "sonner"
+import type { Game } from "@/features/games/types/game"
 
 export function PlayGamePage() {
     const navigate = useNavigate()
     const { id } = useParams()
     const [game, setGame] = useState<Game | null>(null)
     const { loading, fetch } = useFetchGame()
-
-    const wsRef = useRef<WebSocket | null>(null)
     const token = useAuthStore((state) => state.token)
-    const [gameState, setGameState] = useState<any | null>(null)
 
-    const registerEventListeners = (ws: WebSocket): void => {
-        ws.addEventListener("open", () => {
-            if (!token) {
-                return
-            }
-            const payload: TokenMessage = {
-                type: "token",
-                body: { token: token.access_token },
-            }
-            ws.send(JSON.stringify(payload))
-        })
+    const { gameState, sendMessage } = useGameWebSocket(id!, token)
 
-        ws.addEventListener("close", () => {
-            console.debug("ws closed")
-        })
-        ws.addEventListener("message", (event: MessageEvent) => {
-            const { success, data } = GameMessageScheme.safeParse(
-                JSON.parse(JSON.parse(event.data))
-            )
-            if (!success) {
-                console.debug("Failed to parse incoming message")
-                console.debug("message was:", event.data)
-                return
-            }
-            if (data!.type === "game_state") {
-                setGameState(data.body.game_state)
-            }
-            if (data!.type === "connected") {
-                toast.info("Opponent connected")
-            }
-            if (data!.type === "disconnected") {
-                toast.info("Opponent disconnected")
-            }
-
-            console.debug("message received:", data)
-        })
-    }
     useEffect(() => {
         const startup = async () => {
             const game = await fetch(Number(id))
@@ -71,45 +29,24 @@ export function PlayGamePage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
-    useEffect(() => {
-        const ws = new WebSocket(`http://localhost:8000/ws/games/${id}/`)
-        wsRef.current = ws
-        if (wsRef === null) {
-            return
-        }
-        registerEventListeners(ws)
-
-        return () => ws.close()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, id])
-
-    const sendMessage = (message: GameMoveMessage) => {
-        if (!wsRef.current) {
-            return
-        }
-        wsRef.current.send(JSON.stringify(message))
-    }
-    if (loading) {
-        return <div>Loading</div>
-    }
-    if (!game) return
+    if (loading) return <PageLoading />
+    if (!game) return null
     if (!gameState) {
         return (
-            <div>
-                <div>Waiting for opponent</div>
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+                Waiting for opponent...
             </div>
         )
     }
+
     return (
         <div>
-            <div>
-                {game.type === "tic_tac_toe" && (
-                    <TicTacToe
-                        gameState={gameState}
-                        sendMoveHandler={sendMessage}
-                    />
-                )}
-            </div>
+            {game.type === "tic_tac_toe" && (
+                <TicTacToe
+                    gameState={gameState}
+                    sendMoveHandler={sendMessage}
+                />
+            )}
         </div>
     )
 }

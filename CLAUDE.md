@@ -35,14 +35,14 @@ Run a single test file: `pytest services/game/tests/tic_tac_toe/`
 Three microservices + one frontend:
 
 ```
-UI (Vue 3) → API (FastAPI :8000) → Auth (gRPC :50051)
-                                 → Game (gRPC, not yet running)
+UI (React 19) → API (FastAPI :8000) → Auth (gRPC :50051)
+                                 → Game (gRPC :50052)
 ```
 
-- **`services/api/`** — REST gateway. Exposes `/api/v1/auth/`, `/api/v1/users/`, and `/api/v1/ws` (WebSocket). Proxies to Auth via gRPC stub in `dependencies.py`.
+- **`services/api/`** — REST gateway. Exposes `/api/v1/auth/`, `/api/v1/users/`, `/api/v1/games/`, and `/api/v1/ws` (WebSocket). Proxies to Auth and Game via gRPC channels in `main.py`.
 - **`services/auth/`** — gRPC UserService. JWT with Ed25519 keys (in `services/auth/keys/`), Argon2 passwords, PostgreSQL on :25432.
-- **`services/game/`** — gRPC GameService (WIP, `__main__.py` not implemented). Contains game engine abstraction and Tic Tac Toe logic. PostgreSQL on :25433.
-- **`services/ui/`** — Vue 3 + Vite + Pinia + TypeScript frontend.
+- **`services/game/`** — gRPC GameService. Contains game engine abstraction and Tic Tac Toe logic. PostgreSQL on :25433.
+- **`services/ui/`** — React 19 + Vite + Zustand + TypeScript frontend.
 - **`common/`** — Shared Python utilities (logging, secrets, tokens, models).
 - **`proto/`** — Source `.proto` files. Generated output goes to `generated/`.
 

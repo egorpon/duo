@@ -1,6 +1,6 @@
-import { makeRequest } from "@/lib/api"
-import type { ApiResponse } from "@/types/api"
-import type { JWT } from "@/types/token"
+import { makeRequest } from "@/shared/lib/api"
+import type { ApiResponse } from "@/shared/types/api"
+import type { JWT } from "@/features/auth/types/token"
 
 const AuthService = {
     login: async (

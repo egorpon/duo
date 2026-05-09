@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { useCreateGame } from "@/hooks/game/useCreateGame"
-import type { GameType } from "@/types/game"
+import { useCreateGame } from "@/features/games/hooks/useCreateGame"
+import type { GameType } from "@/features/games/types/game"
 import { useNavigate } from "react-router"
 
 export function MainMenu() {

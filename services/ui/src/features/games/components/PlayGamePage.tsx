@@ -1,8 +1,12 @@
-import { TicTacToe } from "@/components/games/tic-tac-toe/TicTacToe"
-import { useFetchGame } from "@/hooks/game/useFetchGame"
-import useAuthStore from "@/stores/auth"
-import type { Game, GameMoveMessage, TokenMessage } from "@/types/game"
-import { GameMessageScheme } from "@/types/game"
+import { TicTacToe } from "@/features/games/components/tic-tac-toe/TicTacToe"
+import { useFetchGame } from "@/features/games/hooks/useFetchGame"
+import useAuthStore from "@/features/auth/stores/auth"
+import type {
+    Game,
+    GameMoveMessage,
+    TokenMessage,
+} from "@/features/games/types/game"
+import { GameMessageScheme } from "@/features/games/types/game"
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import { toast } from "sonner"

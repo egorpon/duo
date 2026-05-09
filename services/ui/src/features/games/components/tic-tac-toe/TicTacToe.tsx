@@ -1,5 +1,5 @@
-import useAuthStore from "@/stores/auth"
-import type { GameMoveMessage } from "@/types/game"
+import useAuthStore from "@/features/auth/stores/auth"
+import type { GameMoveMessage } from "@/features/games/types/game"
 import clsx from "clsx"
 import { z } from "zod"
 import { TicTacToeCell } from "./TicTacToeCell"

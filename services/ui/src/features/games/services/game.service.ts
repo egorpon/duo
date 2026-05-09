@@ -1,6 +1,6 @@
-import { makeRequest } from "@/lib/api"
-import type { ApiResponse } from "@/types/api"
-import type { Game, GameCreate } from "@/types/game"
+import { makeRequest } from "@/shared/lib/api"
+import type { ApiResponse } from "@/shared/types/api"
+import type { Game, GameCreate } from "@/features/games/types/game"
 
 const GameService = {
     create: async (data: GameCreate): Promise<ApiResponse<Game>> => {

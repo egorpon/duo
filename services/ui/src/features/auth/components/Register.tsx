@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { useLogin } from "@/hooks/auth/useLogin"
-import useAuthStore from "@/stores/auth"
+import { useRegister } from "@/features/auth/hooks/useRegister"
+import useAuthStore from "@/features/auth/stores/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
@@ -12,32 +12,29 @@ import { Link, useNavigate } from "react-router"
 import { toast } from "sonner"
 import { z } from "zod"
 
-const LoginSchema = z.object({
+const RegisterSchema = z.object({
     email: z.email("Invalid email"),
     password: z.string().min(8, "Password should be longer than 8 characters"),
 })
+type RegisterInputs = z.infer<typeof RegisterSchema>
 
-type LoginInputs = z.infer<typeof LoginSchema>
-
-export default function Login() {
+export default function Register() {
     const setToken = useAuthStore((state) => state.setToken)
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
-    const { error, loading, login } = useLogin()
+    const { error, loading, register: registerUser } = useRegister()
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<LoginInputs>({
-        resolver: zodResolver(LoginSchema),
-    })
+    } = useForm<RegisterInputs>({ resolver: zodResolver(RegisterSchema) })
 
-    const onSubmit = async (data: LoginInputs) => {
-        const token = await login(data.email, data.password)
+    const onSubmit = async (data: RegisterInputs) => {
+        const token = await registerUser(data.email, data.password)
         if (token) {
             setToken(token)
-            toast.success("Logged in")
+            toast.success("Registered Successfully")
             navigate("/")
             return
         }
@@ -51,10 +48,10 @@ export default function Login() {
                         D
                     </div>
                     <h1 className="mb-4 text-4xl font-bold tracking-tight">
-                        Welcome back to Duo
+                        Start your journey
                     </h1>
                     <p className="text-lg text-primary-foreground/70">
-                        Sign in to continue your journey.
+                        Create an account and join Duo today.
                     </p>
                 </div>
             </div>
@@ -63,10 +60,10 @@ export default function Login() {
                 <div className="w-full max-w-sm">
                     <div className="mb-8">
                         <h2 className="text-2xl font-semibold tracking-tight">
-                            Sign in
+                            Create account
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Enter your credentials to access your account
+                            Fill in your details to get started
                         </p>
                     </div>
 
@@ -101,7 +98,7 @@ export default function Login() {
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
                                     className="pr-8 pl-8"
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                 />
                                 <button
                                     type="button"
@@ -136,17 +133,17 @@ export default function Login() {
                             disabled={loading}
                         >
                             {loading && <Spinner className="mr-2" />}
-                            Sign in
+                            Create account
                         </Button>
                     </form>
 
                     <p className="mt-8 text-center text-sm text-muted-foreground">
-                        Don't have an account?{" "}
+                        Already have an account?{" "}
                         <Link
-                            to="/auth/register"
+                            to="/auth/login"
                             className="font-medium text-primary hover:underline"
                         >
-                            Sign up
+                            Sign in
                         </Link>
                     </p>
                 </div>

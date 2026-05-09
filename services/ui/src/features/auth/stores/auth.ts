@@ -1,6 +1,6 @@
-import { UserService } from "@/services/user.service"
-import type { JWT } from "@/types/token"
-import type { User } from "@/types/user"
+import { UserService } from "@/features/auth/services/user.service"
+import type { JWT } from "@/features/auth/types/token"
+import type { User } from "@/features/auth/types/user"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 

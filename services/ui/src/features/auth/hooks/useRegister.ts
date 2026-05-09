@@ -1,5 +1,5 @@
-import { AuthService } from "@/services/auth.service"
-import type { JWT } from "@/types/token"
+import { AuthService } from "@/features/auth/services/auth.service"
+import type { JWT } from "@/features/auth/types/token"
 import { useState } from "react"
 
 export function useRegister() {

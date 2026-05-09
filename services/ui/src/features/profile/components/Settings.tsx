@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import useAuthStore from "@/stores/auth"
+import useAuthStore from "@/features/auth/stores/auth"
 
 export default function Settings() {
     const logout = useAuthStore((state) => state.logout)

@@ -12,7 +12,7 @@ import {
     SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar/hooks"
-import useAuthStore from "@/stores/auth"
+import useAuthStore from "@/features/auth/stores/auth"
 import { Home, Info, PanelLeft, Settings, User2 } from "lucide-react"
 import { Link, useNavigate } from "react-router"
 import {
@@ -20,7 +20,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 
 const items = [
     { title: "Home", url: "/", icon: Home },

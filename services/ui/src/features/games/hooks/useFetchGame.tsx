@@ -1,5 +1,5 @@
-import { GameService } from "@/services/game.service"
-import type { Game } from "@/types/game"
+import { GameService } from "@/features/games/services/game.service"
+import type { Game } from "@/features/games/types/game"
 import { useState } from "react"
 
 export function useFetchGame() {

@@ -20,8 +20,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/shared/hooks/use-mobile"
+import { cn } from "@/shared/lib/utils"
 import { PanelLeftIcon } from "lucide-react"
 import { useSidebar, SidebarContext, type SidebarContextProps } from "./hooks"
 

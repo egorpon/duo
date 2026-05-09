@@ -92,7 +92,21 @@ export function PlayGamePage() {
     }
     if (!game) return
     if (!gameState) {
-        return <div>Waiting for opponent</div>
+        return (
+            <div>
+                <div>Waiting for opponent</div>
+
+                {debug && (
+                    <div>
+                        {messages.map((row, idx) => (
+                            <div key={idx}>
+                                {idx}: {JSON.stringify(row)}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        )
     }
     return (
         <div>

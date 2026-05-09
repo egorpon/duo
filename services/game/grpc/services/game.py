@@ -77,7 +77,7 @@ class GameService(game_pb2_grpc.GameServiceServicer):
             game=game,
             player2=request.player_id,
             status=Status.IN_PROGRESS,
-            state=engine.state.model_dump_json(),
+            state=engine.state.model_dump(),
         )
 
         assert game.player2 is not None

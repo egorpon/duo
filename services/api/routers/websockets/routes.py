@@ -129,6 +129,20 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
             )
             game = response.game
+            await connections[game.player1].send_json(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(response.player1_view)
+                    )
+                ).model_dump_json()
+            )
+            await connections[game.player2].send_json(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(response.player2_view)
+                    )
+                ).model_dump_json()
+            )
 
         elif is_player_reconnected:
             logger.debug('second player is reconnected, can safely play a game')

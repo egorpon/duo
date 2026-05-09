@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import useAuthStore from "./stores/auth"
 import { type GameMessage, GameMessageScheme } from "./types/game"
 import type { TokenMessage, GameMoveMessage } from "@/types/game"
-import { TicTacToe } from "./components/games/tic-tac-toe/TicTacToeBoard"
+import { TicTacToe } from "./components/games/tic-tac-toe/TicTacToe"
 
 const url = "http://localhost:8000/ws/games/1/"
 

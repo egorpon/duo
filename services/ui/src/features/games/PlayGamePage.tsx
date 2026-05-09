@@ -3,22 +3,20 @@ import { useFetchGame } from "@/hooks/game/useFetchGame"
 import useAuthStore from "@/stores/auth"
 import type {
     Game,
-    GameMessage,
     GameMoveMessage,
     TokenMessage,
 } from "@/types/game"
 import { GameMessageScheme } from "@/types/game"
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
-
-const debug: boolean = true
+import { toast } from "sonner"
 
 export function PlayGamePage() {
     const navigate = useNavigate()
     const { id } = useParams()
     const [game, setGame] = useState<Game | null>(null)
     const { loading, fetch } = useFetchGame()
-    const [messages, setMessages] = useState<GameMessage[]>([])
+
 
     const wsRef = useRef<WebSocket | null>(null)
     const token = useAuthStore((state) => state.token)
@@ -51,8 +49,14 @@ export function PlayGamePage() {
             if (data!.type === "game_state") {
                 setGameState(data.body.game_state)
             }
+            if (data!.type === 'connected') {
+                toast.info('Opponent connected')
+            }
+            if (data!.type === 'disconnected') {
+                toast.info('Opponent disconnected')
+            }
 
-            setMessages((prev) => [...prev, data])
+            console.debug("message received:", data)
         })
     }
     useEffect(() => {
@@ -94,16 +98,6 @@ export function PlayGamePage() {
         return (
             <div>
                 <div>Waiting for opponent</div>
-
-                {debug && (
-                    <div>
-                        {messages.map((row, idx) => (
-                            <div key={idx}>
-                                {idx}: {JSON.stringify(row)}
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
         )
     }
@@ -119,15 +113,6 @@ export function PlayGamePage() {
                     />
                 )}
             </div>
-            {debug && (
-                <div>
-                    {messages.map((row, idx) => (
-                        <div key={idx}>
-                            {idx}: {JSON.stringify(row)}
-                        </div>
-                    ))}
-                </div>
-            )}
         </div>
     )
 }

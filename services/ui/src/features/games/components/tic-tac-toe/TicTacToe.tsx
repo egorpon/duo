@@ -1,7 +1,17 @@
 import useAuthStore from "@/features/auth/stores/auth"
 import type { GameMoveMessage } from "@/features/games/types/game"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import clsx from "clsx"
 import { z } from "zod"
+import { useNavigate } from "react-router"
 import { TicTacToeCell } from "./TicTacToeCell"
 
 const MoveSchema = z.enum(["x", "o"])
@@ -35,6 +45,7 @@ interface Props {
 }
 export function TicTacToe({ gameState, sendMoveHandler }: Props) {
     const user = useAuthStore((state) => state.user)
+    const navigate = useNavigate()
     const { data } = TicTacToeStateSchema.safeParse(gameState)
     if (data === undefined) {
         return <div>Failed to parse game state</div>
@@ -55,8 +66,32 @@ export function TicTacToe({ gameState, sendMoveHandler }: Props) {
         return state.your_turn ? "Your turn" : "Opponent's turn"
     }
 
+    const getDialogTitle = () => {
+        if (state.is_draw) return "It's a draw!"
+        if (state.winner !== null)
+            return state.winner === user?.id ? "You win! 🎉" : "You lost!"
+        return ""
+    }
+
     return (
         <div className="flex flex-col items-center gap-6 p-8">
+            <Dialog open={isOver}>
+                <DialogContent showCloseButton={false}>
+                    <DialogHeader>
+                        <DialogTitle className="text-center text-2xl">
+                            {getDialogTitle()}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription className="sr-only">
+                        Game over
+                    </DialogDescription>
+                    <DialogFooter className="sm:justify-center">
+                        <Button onClick={() => navigate("/")}>
+                            Back to main menu
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             {/* Header */}
             <div className="flex flex-col items-center gap-2">
                 <h2 className="text-2xl font-bold tracking-tight">

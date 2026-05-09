@@ -1,9 +1,10 @@
-import App from "@/App"
 import Error from "@/components/Error"
 import { PageLoading } from "@/components/layout/PageLoading"
 import VerticalLayout from "@/components/layout/VerticalLayout"
 import Login from "@/features/auth/Login"
 import Register from "@/features/auth/Register"
+import { MainMenu } from "@/features/games/MainMenu"
+import { PlayGamePage } from "@/features/games/PlayGamePage"
 import Settings from "@/features/profile/Settings"
 import useAuthStore from "@/stores/auth"
 import { createBrowserRouter, redirect } from "react-router"
@@ -34,7 +35,11 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                Component: App,
+                Component: MainMenu,
+            },
+            {
+                path: "game/:id",
+                Component: PlayGamePage,
             },
             {
                 path: "settings",

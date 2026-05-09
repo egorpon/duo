@@ -1,16 +1,16 @@
 import { GameService } from "@/services/game.service"
-import type { Game, GameCreate } from "@/types/game"
+import type { Game } from "@/types/game"
 import { useState } from "react"
 
-export function useCreateGame() {
+export function useFetchGame() {
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string>("")
 
-    const create = async (data: GameCreate): Promise<Game | null> => {
+    const fetch = async (id: number): Promise<Game | null> => {
         setError("")
         setLoading(true)
 
-        const { result, error } = await GameService.create(data)
+        const { result, error } = await GameService.get(id)
         setLoading(false)
 
         if (error) {
@@ -20,5 +20,5 @@ export function useCreateGame() {
         return result
     }
 
-    return { loading, create, error }
+    return { loading, fetch, error }
 }

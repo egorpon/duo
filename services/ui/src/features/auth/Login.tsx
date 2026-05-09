@@ -9,6 +9,7 @@ import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router"
+import { toast } from "sonner"
 import { z } from "zod"
 
 const LoginSchema = z.object({
@@ -36,7 +37,9 @@ export default function Login() {
         const token = await login(data.email, data.password)
         if (token) {
             setToken(token)
+            toast.success("Logged in")
             navigate("/")
+            return
         }
     }
 

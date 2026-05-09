@@ -9,6 +9,7 @@ import { AtSign, Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Link, useNavigate } from "react-router"
+import { toast } from "sonner"
 import { z } from "zod"
 
 const RegisterSchema = z.object({
@@ -33,7 +34,9 @@ export default function Register() {
         const token = await registerUser(data.email, data.password)
         if (token) {
             setToken(token)
+            toast.success("Registered Successfully")
             navigate("/")
+            return
         }
     }
 

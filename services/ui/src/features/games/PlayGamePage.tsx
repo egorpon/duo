@@ -26,7 +26,6 @@ export function PlayGamePage() {
 
     const registerEventListeners = (ws: WebSocket): void => {
         ws.addEventListener("open", () => {
-            console.log("ws open")
             if (!token) {
                 return
             }
@@ -38,15 +37,15 @@ export function PlayGamePage() {
         })
 
         ws.addEventListener("close", () => {
-            console.log("ws closed")
+            console.debug("ws closed")
         })
         ws.addEventListener("message", (event: MessageEvent) => {
             const { success, data } = GameMessageScheme.safeParse(
                 JSON.parse(JSON.parse(event.data))
             )
             if (!success) {
-                console.log("Failed to parse incoming message")
-                console.log("message was:", event.data)
+                console.debug("Failed to parse incoming message")
+                console.debug("message was:", event.data)
                 return
             }
             if (data!.type === "game_state") {

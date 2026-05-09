@@ -168,13 +168,22 @@ async def play_game(  # noqa: PLR0912, PLR0915
                     )
                 )
                 continue
-            move_response = await game_service.MakeMove(
-                game_pb2.MakeMoveRequest(
-                    game_id=game_id,
-                    player_id=user,
-                    move_data=json.dumps(message.body.game_move),
+            try:
+                move_response = await game_service.MakeMove(
+                    game_pb2.MakeMoveRequest(
+                        game_id=game_id,
+                        player_id=user,
+                        move_data=json.dumps(message.body.game_move),
+                    )
                 )
-            )
+            except Exception:
+                await websocket.send_json(
+                    InvalidMoveMessage(
+                        body=InvalidMoveMessageBody(message='invalid move')
+                    ).model_dump_json()
+                )
+                continue
+
             game = move_response.game
             await connections[game.player1].send_json(
                 GameStateMessage(

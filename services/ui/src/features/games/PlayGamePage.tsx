@@ -1,11 +1,7 @@
 import { TicTacToe } from "@/components/games/tic-tac-toe/TicTacToe"
 import { useFetchGame } from "@/hooks/game/useFetchGame"
 import useAuthStore from "@/stores/auth"
-import type {
-    Game,
-    GameMoveMessage,
-    TokenMessage,
-} from "@/types/game"
+import type { Game, GameMoveMessage, TokenMessage } from "@/types/game"
 import { GameMessageScheme } from "@/types/game"
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
@@ -16,7 +12,6 @@ export function PlayGamePage() {
     const { id } = useParams()
     const [game, setGame] = useState<Game | null>(null)
     const { loading, fetch } = useFetchGame()
-
 
     const wsRef = useRef<WebSocket | null>(null)
     const token = useAuthStore((state) => state.token)
@@ -49,11 +44,11 @@ export function PlayGamePage() {
             if (data!.type === "game_state") {
                 setGameState(data.body.game_state)
             }
-            if (data!.type === 'connected') {
-                toast.info('Opponent connected')
+            if (data!.type === "connected") {
+                toast.info("Opponent connected")
             }
-            if (data!.type === 'disconnected') {
-                toast.info('Opponent disconnected')
+            if (data!.type === "disconnected") {
+                toast.info("Opponent disconnected")
             }
 
             console.debug("message received:", data)
@@ -104,8 +99,6 @@ export function PlayGamePage() {
     return (
         <div>
             <div>
-                <div>ID: {game.id}</div>
-                <div>Game: {game.type}</div>
                 {game.type === "tic_tac_toe" && (
                     <TicTacToe
                         gameState={gameState}

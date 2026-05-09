@@ -11,7 +11,7 @@ export function useGameWebSocket(id: string, token: JWT | null) {
     const [gameState, setGameState] = useState<unknown>(null)
 
     useEffect(() => {
-        const ws = new WebSocket(`${WS_BASE_URL}/games/${id}/`)
+        const ws = new WebSocket(`${WS_BASE_URL}games/${id}/`)
         wsRef.current = ws
 
         ws.addEventListener("open", () => {

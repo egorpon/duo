@@ -15,7 +15,7 @@ export function useGameWebSocket(id: string, token: JWT | null) {
         wsRef.current = ws
 
         ws.addEventListener("open", () => {
-            console.debug('ws open')
+            console.debug("ws open")
             if (!token) return
             ws.send(
                 JSON.stringify({

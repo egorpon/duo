@@ -34,8 +34,8 @@ class GameLoggingAdapter(logging.LoggerAdapter[logging.Logger]):
         if self.extra is None:
             return msg, kwargs
 
-        game = self.extra.get('game', '_')
-        user = self.extra.get('user', '_')
+        game = self.extra.get('game', '-')
+        user = self.extra.get('user', '-')
         return f'({game} : {user}) {msg}', kwargs
 
 
@@ -51,6 +51,30 @@ def get_opponent(game: game_pb2.Game, user: int) -> int:
         return game.player1
 
     raise Exception('Opponent not found')
+
+
+async def handle_authentication(
+    *,
+    websocket: WebSocket,
+    logger: GameLoggingAdapter,
+) -> int | None:
+    await websocket.accept()
+    logger.debug('connection accepted')
+
+    message = GameMessageAdapter.validate_python(await websocket.receive_json())
+
+    if message.type != MessageType.TOKEN:
+        logger.debug('received message is not token, rejecting')
+        await websocket.close(code=1008, reason='not authenticated')
+        return None
+
+    user = get_user_from_token(message.body.token)
+    if user is None:
+        logger.debug('token is not valid, rejecting')
+        await websocket.close(code=1008, reason='not authenticated')
+        return None
+
+    return user
 
 
 @router.websocket('/games/{game_id}/')
@@ -75,21 +99,8 @@ async def play_game(  # noqa: PLR0912, PLR0915
         return
 
     try:
-        await websocket.accept()
-        logger.debug('connection accepted')
-
-        message = GameMessageAdapter.validate_python(
-            await websocket.receive_json()
-        )
-        if message.type != MessageType.TOKEN:
-            logger.debug('received message is not token, rejecting')
-            await websocket.close(code=1008, reason='not authenticated')
-            return
-
-        user = get_user_from_token(message.body.token)
-        if user is None:
-            logger.debug('token is not valid, rejecting')
-            await websocket.close(code=1008, reason='not authenticated')
+        user = await handle_authentication(websocket=websocket, logger=logger)
+        if not user:
             return
 
         logger.extra['user'] = user
@@ -219,14 +230,15 @@ async def play_game(  # noqa: PLR0912, PLR0915
     except Exception:
         logger.exception('Unexpected exception')
     finally:
-        if user:
-            opponent = get_opponent(game=game, user=user)
-            if opponent in connections.keys():
-                await connections[opponent].send_text(
-                    data=DisconnectedMessage(
-                        body=DisconnectedMessageBody(
-                            message='Opponent disconnected'
-                        ),
-                    ).model_dump_json(),
-                )
-                connections.pop(user, None)
+        if user and (
+            (opponent := get_opponent(game=game, user=user))
+            in connections.keys()
+        ):
+            await connections[opponent].send_text(
+                data=DisconnectedMessage(
+                    body=DisconnectedMessageBody(
+                        message='Opponent disconnected'
+                    ),
+                ).model_dump_json(),
+            )
+            connections.pop(user, None)

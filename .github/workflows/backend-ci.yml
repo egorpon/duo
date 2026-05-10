@@ -21,6 +21,20 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen
+      
+      - name: Generate Proto
+        run: |
+          cp ./proto/*.proto ./generated/
+          uv run python \
+            -m grpc_tools.protoc \
+            -I . \
+            --python_out=. \
+            --grpc_python_out=. \
+            --mypy_out=. \
+            --mypy_grpc_out=. \
+            ./generated/*.proto
+          rm ./generated/*.proto
+
 
       - name: Format
         run: uv run ruff format --check

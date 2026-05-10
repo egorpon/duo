@@ -170,7 +170,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 logger.debug('player reconnected to empty room')
 
         while True:
-            logger.info('waiting for message')
+            logger.debug('waiting for message')
             message = GameMessageAdapter.validate_python(
                 await websocket.receive_json()
             )

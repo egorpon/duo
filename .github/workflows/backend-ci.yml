@@ -8,7 +8,7 @@ on:
   workflow_call:
 
 jobs:
-  ci:
+  checks-backend:
     runs-on: ubuntu-latest
 
     steps:

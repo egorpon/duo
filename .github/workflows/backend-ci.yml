@@ -1,0 +1,36 @@
+name: checks-backend
+
+on:
+  push:
+    branches: [main]
+  pull_requests:
+    branches: [main]
+  workflow_call:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true  # caches based on uv.lock automatically
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Format
+        run: uv run ruff format --check
+
+      - name: Lint
+        run: uv run ruff check
+
+      - name: Type check
+        run: uv run basedpyright
+
+      - name: Tests
+        run: uv run pytest
+

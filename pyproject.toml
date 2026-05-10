@@ -83,12 +83,13 @@ exclude = [
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = """
--ra 
+-rav
+--tb=short
 --strict-markers 
 --disable-warnings
 """
 testpaths = ["services"]
-norecursedirs = ["*.egg", ".git", "__pycache__"]
+norecursedirs = ["*.egg", ".git", "__pycache__", "services/ui"]
 
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

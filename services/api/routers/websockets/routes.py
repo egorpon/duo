@@ -111,7 +111,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
             return
 
         connections[user] = websocket
-        await websocket.send_json(
+        await websocket.send_text(
             data=AuthenticatedMessage(
                 body=AuthenticatedMessageBody(
                     success=True,
@@ -129,14 +129,14 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
             )
             game = response.game
-            await connections[game.player1].send_json(
+            await connections[game.player1].send_text(
                 GameStateMessage(
                     body=GameStateMessageBody(
                         game_state=json.loads(response.player1_view)
                     )
                 ).model_dump_json()
             )
-            await connections[game.player2].send_json(
+            await connections[game.player2].send_text(
                 GameStateMessage(
                     body=GameStateMessageBody(
                         game_state=json.loads(response.player2_view)
@@ -150,7 +150,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
             player_view = await game_service.GetPlayerView(
                 game_pb2.GetPlayerViewRequest(game_id=game.id, player_id=user)
             )
-            await connections[user].send_json(
+            await connections[user].send_text(
                 GameStateMessage(
                     body=GameStateMessageBody(
                         game_state=json.loads(player_view.game_state)
@@ -158,7 +158,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 ).model_dump_json()
             )
             if opponent in connections:
-                await connections[opponent].send_json(
+                await connections[opponent].send_text(
                     ConnectedMessage(
                         body=ConnectedMessageBody(
                             message=f'Opponent {user} connected'
@@ -176,10 +176,10 @@ async def play_game(  # noqa: PLR0912, PLR0915
             )
             logger.debug('message received: %s', message)
             if message.type != MessageType.GAME_MOVE:
-                await websocket.send_json(
+                await websocket.send_text(
                     InvalidMoveMessage(
                         body=InvalidMoveMessageBody(message='invalid move')
-                    )
+                    ).model_dump_json()
                 )
                 continue
             try:
@@ -191,7 +191,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
                     )
                 )
             except Exception:
-                await websocket.send_json(
+                await websocket.send_text(
                     InvalidMoveMessage(
                         body=InvalidMoveMessageBody(message='invalid move')
                     ).model_dump_json()
@@ -199,14 +199,14 @@ async def play_game(  # noqa: PLR0912, PLR0915
                 continue
 
             game = move_response.game
-            await connections[game.player1].send_json(
+            await connections[game.player1].send_text(
                 GameStateMessage(
                     body=GameStateMessageBody(
                         game_state=json.loads(move_response.player1_view)
                     )
                 ).model_dump_json()
             )
-            await connections[game.player2].send_json(
+            await connections[game.player2].send_text(
                 GameStateMessage(
                     body=GameStateMessageBody(
                         game_state=json.loads(move_response.player2_view)
@@ -222,7 +222,7 @@ async def play_game(  # noqa: PLR0912, PLR0915
         if user:
             opponent = get_opponent(game=game, user=user)
             if opponent in connections.keys():
-                await connections[opponent].send_json(
+                await connections[opponent].send_text(
                     data=DisconnectedMessage(
                         body=DisconnectedMessageBody(
                             message='Opponent disconnected'

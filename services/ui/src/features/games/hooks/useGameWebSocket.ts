@@ -15,6 +15,7 @@ export function useGameWebSocket(id: string, token: JWT | null) {
         wsRef.current = ws
 
         ws.addEventListener("open", () => {
+            console.debug('ws open')
             if (!token) return
             ws.send(
                 JSON.stringify({
@@ -30,16 +31,21 @@ export function useGameWebSocket(id: string, token: JWT | null) {
 
         ws.addEventListener("message", (event: MessageEvent) => {
             const { success, data } = GameMessageScheme.safeParse(
-                JSON.parse(JSON.parse(event.data))
+                JSON.parse(event.data)
             )
             if (!success) {
                 console.debug("Failed to parse incoming message", event.data)
                 return
             }
-            if (data!.type === "game_state") setGameState(data.body.game_state)
-            if (data!.type === "connected") toast.info("Opponent connected")
-            if (data!.type === "disconnected")
+            if (data!.type === "game_state") {
+                setGameState(data.body.game_state)
+            }
+            if (data!.type === "connected") {
+                toast.info("Opponent connected")
+            }
+            if (data!.type === "disconnected") {
                 toast.info("Opponent disconnected")
+            }
             console.debug("message received:", data)
         })
 

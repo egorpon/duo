@@ -77,8 +77,62 @@ async def handle_authentication(
     return user
 
 
+async def _game_loop(
+    *,
+    logger: GameLoggingAdapter,
+    websocket: WebSocket,
+    game_service: game_pb2_grpc.GameServiceAsyncStub,
+    user: int,
+    game_id: int,
+) -> None:
+    while True:
+        logger.debug('waiting for message')
+        message = GameMessageAdapter.validate_python(
+            await websocket.receive_json()
+        )
+        logger.debug('message received: %s', message)
+        if message.type != MessageType.GAME_MOVE:
+            await websocket.send_text(
+                InvalidMoveMessage(
+                    body=InvalidMoveMessageBody(message='invalid move')
+                ).model_dump_json()
+            )
+            continue
+        try:
+            move_response = await game_service.MakeMove(
+                game_pb2.MakeMoveRequest(
+                    game_id=game_id,
+                    player_id=user,
+                    move_data=json.dumps(message.body.game_move),
+                )
+            )
+        except Exception:
+            await websocket.send_text(
+                InvalidMoveMessage(
+                    body=InvalidMoveMessageBody(message='invalid move')
+                ).model_dump_json()
+            )
+            continue
+
+        game = move_response.game
+        await connections[game.player1].send_text(
+            GameStateMessage(
+                body=GameStateMessageBody(
+                    game_state=json.loads(move_response.player1_view)
+                )
+            ).model_dump_json()
+        )
+        await connections[game.player2].send_text(
+            GameStateMessage(
+                body=GameStateMessageBody(
+                    game_state=json.loads(move_response.player2_view)
+                )
+            ).model_dump_json()
+        )
+
+
 @router.websocket('/games/{game_id}/')
-async def play_game(  # noqa: PLR0912, PLR0915
+async def play_game(
     websocket: WebSocket,
     game_id: int,
 ) -> None:
@@ -180,51 +234,13 @@ async def play_game(  # noqa: PLR0912, PLR0915
             else:
                 logger.debug('player reconnected to empty room')
 
-        while True:
-            logger.debug('waiting for message')
-            message = GameMessageAdapter.validate_python(
-                await websocket.receive_json()
-            )
-            logger.debug('message received: %s', message)
-            if message.type != MessageType.GAME_MOVE:
-                await websocket.send_text(
-                    InvalidMoveMessage(
-                        body=InvalidMoveMessageBody(message='invalid move')
-                    ).model_dump_json()
-                )
-                continue
-            try:
-                move_response = await game_service.MakeMove(
-                    game_pb2.MakeMoveRequest(
-                        game_id=game_id,
-                        player_id=user,
-                        move_data=json.dumps(message.body.game_move),
-                    )
-                )
-            except Exception:
-                await websocket.send_text(
-                    InvalidMoveMessage(
-                        body=InvalidMoveMessageBody(message='invalid move')
-                    ).model_dump_json()
-                )
-                continue
-
-            game = move_response.game
-            await connections[game.player1].send_text(
-                GameStateMessage(
-                    body=GameStateMessageBody(
-                        game_state=json.loads(move_response.player1_view)
-                    )
-                ).model_dump_json()
-            )
-            await connections[game.player2].send_text(
-                GameStateMessage(
-                    body=GameStateMessageBody(
-                        game_state=json.loads(move_response.player2_view)
-                    )
-                ).model_dump_json()
-            )
-
+        await _game_loop(
+            logger=logger,
+            user=user,
+            websocket=websocket,
+            game_id=game_id,
+            game_service=game_service,
+        )
     except WebSocketDisconnect:
         logger.debug('user disconnected')
     except Exception:

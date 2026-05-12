@@ -3,7 +3,7 @@ import logging
 from typing import Any, MutableMapping
 
 from fastapi import APIRouter, WebSocket
-from fastapi.websockets import WebSocketDisconnect
+from fastapi.websockets import WebSocketDisconnect, WebSocketState
 
 from generated import game_pb2, game_pb2_grpc
 from services.api.routers.websockets.types import (
@@ -279,7 +279,11 @@ async def play_game(
         if user:
             connections.pop(user, None)
             opponent = get_opponent(game=game, user=user)
-            if opponent and (ws := connections.get(opponent, None)):
+            if (
+                opponent
+                and (ws := connections.get(opponent, None))
+                and ws.client_state == WebSocketState.CONNECTED
+            ):
                 await ws.send_text(
                     data=DisconnectedMessage(
                         body=DisconnectedMessageBody(

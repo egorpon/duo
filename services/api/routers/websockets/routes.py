@@ -39,8 +39,6 @@ class GameLoggingAdapter(logging.LoggerAdapter[logging.Logger]):
         return f'({game} : {user}) {msg}', kwargs
 
 
-logger = GameLoggingAdapter(logger=_logger)
-
 connections: dict[int, WebSocket] = {}
 
 
@@ -137,6 +135,7 @@ async def play_game(
     game_id: int,
 ) -> None:
     user: int | None = None
+    logger = GameLoggingAdapter(logger=_logger)
     logger.extra = {'game': game_id}
 
     game_service: game_pb2_grpc.GameServiceAsyncStub = (  # pyright: ignore

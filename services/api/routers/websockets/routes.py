@@ -141,6 +141,62 @@ async def _fetch_game(
         return None
 
 
+async def _handle_second_player_join(
+    *,
+    game_service: game_pb2_grpc.GameServiceAsyncStub,
+    game: game_pb2.Game,
+    user: int,
+) -> game_pb2.Game:
+    response = await game_service.JoinGame(
+        game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
+    )
+    game = response.game
+    await connections[game.player1].send_text(
+        GameStateMessage(
+            body=GameStateMessageBody(
+                game_state=json.loads(response.player1_view)
+            )
+        ).model_dump_json()
+    )
+    await connections[game.player2].send_text(
+        GameStateMessage(
+            body=GameStateMessageBody(
+                game_state=json.loads(response.player2_view)
+            )
+        ).model_dump_json()
+    )
+    return game
+
+
+async def _handle_player_reconnected(
+    *,
+    game_service: game_pb2_grpc.GameServiceAsyncStub,
+    game: game_pb2.Game,
+    user: int,
+    logger: GameLoggingAdapter,
+) -> None:
+    player_view = await game_service.GetPlayerView(
+        game_pb2.GetPlayerViewRequest(game_id=game.id, player_id=user)
+    )
+    await connections[user].send_text(
+        GameStateMessage(
+            body=GameStateMessageBody(
+                game_state=json.loads(player_view.game_state)
+            )
+        ).model_dump_json()
+    )
+    opponent = get_opponent(game=game, user=user)
+    if opponent and opponent in connections:
+        await connections[opponent].send_text(
+            ConnectedMessage(
+                body=ConnectedMessageBody(message=f'Opponent {user} connected'),
+            ).model_dump_json()
+        )
+        logger.debug('second player connected')
+    else:
+        logger.debug('player reconnected to empty room')
+
+
 @router.websocket('/games/{game_id}/')
 async def play_game(
     websocket: WebSocket,
@@ -196,49 +252,15 @@ async def play_game(
 
         elif is_second_player_joins:
             logger.debug('second player joins game')
-            response = await game_service.JoinGame(
-                game_pb2.JoinGameRequest(game_id=game.id, player_id=user),
-            )
-            game = response.game
-            await connections[game.player1].send_text(
-                GameStateMessage(
-                    body=GameStateMessageBody(
-                        game_state=json.loads(response.player1_view)
-                    )
-                ).model_dump_json()
-            )
-            await connections[game.player2].send_text(
-                GameStateMessage(
-                    body=GameStateMessageBody(
-                        game_state=json.loads(response.player2_view)
-                    )
-                ).model_dump_json()
+            game = await _handle_second_player_join(
+                game_service=game_service, game=game, user=user
             )
 
         elif is_player_reconnected:
             logger.debug('second player is reconnected, can safely play a game')
-            player_view = await game_service.GetPlayerView(
-                game_pb2.GetPlayerViewRequest(game_id=game.id, player_id=user)
+            await _handle_player_reconnected(
+                game_service=game_service, game=game, user=user, logger=logger
             )
-            await connections[user].send_text(
-                GameStateMessage(
-                    body=GameStateMessageBody(
-                        game_state=json.loads(player_view.game_state)
-                    )
-                ).model_dump_json()
-            )
-            opponent = get_opponent(game=game, user=user)
-            if opponent and opponent in connections:
-                await connections[opponent].send_text(
-                    ConnectedMessage(
-                        body=ConnectedMessageBody(
-                            message=f'Opponent {user} connected'
-                        ),
-                    ).model_dump_json()
-                )
-                logger.debug('second player connected')
-            else:
-                logger.debug('player reconnected to empty room')
 
         await _game_loop(
             logger=logger,
@@ -255,8 +277,8 @@ async def play_game(
         if user:
             connections.pop(user, None)
             opponent = get_opponent(game=game, user=user)
-            if opponent:
-                await connections[opponent].send_text(
+            if opponent and (ws := connections.get(opponent, None)):
+                await ws.send_text(
                     data=DisconnectedMessage(
                         body=DisconnectedMessageBody(
                             message='Opponent disconnected'

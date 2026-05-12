@@ -42,13 +42,12 @@ class GameLoggingAdapter(logging.LoggerAdapter[logging.Logger]):
 connections: dict[int, WebSocket] = {}
 
 
-def get_opponent(game: game_pb2.Game, user: int) -> int:
+def get_opponent(game: game_pb2.Game, user: int) -> int | None:
     if game.player1 == user:
         return game.player2
     if game.player2 == user:
         return game.player1
-
-    raise Exception('Opponent not found')
+    return None
 
 
 async def handle_authentication(
@@ -218,7 +217,6 @@ async def play_game(
 
         elif is_player_reconnected:
             logger.debug('second player is reconnected, can safely play a game')
-            opponent = get_opponent(game=game, user=user)
             player_view = await game_service.GetPlayerView(
                 game_pb2.GetPlayerViewRequest(game_id=game.id, player_id=user)
             )
@@ -229,7 +227,8 @@ async def play_game(
                     )
                 ).model_dump_json()
             )
-            if opponent in connections:
+            opponent = get_opponent(game=game, user=user)
+            if opponent and opponent in connections:
                 await connections[opponent].send_text(
                     ConnectedMessage(
                         body=ConnectedMessageBody(
@@ -253,15 +252,14 @@ async def play_game(
     except Exception:
         logger.exception('Unexpected exception')
     finally:
-        if user and (
-            (opponent := get_opponent(game=game, user=user))
-            in connections.keys()
-        ):
-            await connections[opponent].send_text(
-                data=DisconnectedMessage(
-                    body=DisconnectedMessageBody(
-                        message='Opponent disconnected'
-                    ),
-                ).model_dump_json(),
-            )
+        if user:
             connections.pop(user, None)
+            opponent = get_opponent(game=game, user=user)
+            if opponent:
+                await connections[opponent].send_text(
+                    data=DisconnectedMessage(
+                        body=DisconnectedMessageBody(
+                            message='Opponent disconnected'
+                        ),
+                    ).model_dump_json(),
+                )

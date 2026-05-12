@@ -13,6 +13,7 @@ from services.api.schemas.auth import (
     UserUpdatePasswordRequest,
 )
 from services.api.security import Credentials
+from services.api.token import get_user_from_token
 
 router = APIRouter(tags=['users'])
 
@@ -22,6 +23,12 @@ async def user_me(
     credentials: Credentials,
     stub: UserServiceDep,
 ) -> UserDisplay:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
+
     try:
         resp = await stub.GetCurrentUser(
             Empty(),
@@ -51,6 +58,11 @@ async def user_detail(
     credentials: Credentials,
     stub: UserServiceDep,
 ) -> UserDisplay:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
     try:
         resp = await stub.GetUserById(
             auth_pb2.GetUserByIdRequest(
@@ -86,6 +98,11 @@ async def user_update_email(
     data: UserUpdateEmailRequest,
     stub: UserServiceDep,
 ) -> UserDisplay:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
     try:
         resp = await stub.UpdateUserEmail(
             auth_pb2.UpdateUserEmailRequest(new_email=data.email),
@@ -121,6 +138,11 @@ async def user_update_password(
     data: UserUpdatePasswordRequest,
     stub: UserServiceDep,
 ) -> JsonWebToken:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
     try:
         resp = await stub.UpdateUserPassword(
             auth_pb2.UpdateUserPasswordRequest(

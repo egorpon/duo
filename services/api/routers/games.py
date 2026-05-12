@@ -13,6 +13,7 @@ from generated import game_pb2
 from services.api.dependencies import GameServiceDep
 from services.api.schemas.games import CreateGameRequest, GameResponse
 from services.api.security import Credentials
+from services.api.token import get_user_from_token
 
 router = APIRouter(tags=['games'])
 
@@ -38,6 +39,11 @@ async def game_create(
     game_stub: GameServiceDep,
     data: CreateGameRequest,
 ) -> GameResponse:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
     meta = (('authorization', credentials.credentials),)
     try:
         game = await game_stub.CreateGame(
@@ -64,6 +70,11 @@ async def game_detail(
     game_stub: GameServiceDep,
     game_id: int,
 ) -> GameResponse:
+    user = get_user_from_token(credentials.credentials)
+    if user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail='Not authenticated'
+        )
     meta = (('authorization', credentials.credentials),)
     try:
         game = await game_stub.GetGameById(

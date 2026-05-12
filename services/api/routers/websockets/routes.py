@@ -129,6 +129,19 @@ async def _game_loop(
         )
 
 
+async def _fetch_game(
+    *,
+    game_service: game_pb2_grpc.GameServiceAsyncStub,
+    game_id: int,
+) -> game_pb2.Game | None:
+    try:
+        return await game_service.GetGameById(
+            game_pb2.GetGameByIdRequest(game_id=game_id)
+        )
+    except Exception:
+        return None
+
+
 @router.websocket('/games/{game_id}/')
 async def play_game(
     websocket: WebSocket,
@@ -141,14 +154,9 @@ async def play_game(
     game_service: game_pb2_grpc.GameServiceAsyncStub = (  # pyright: ignore
         game_pb2_grpc.GameServiceStub(websocket.app.state.game_channel)
     )
-    try:
-        game = await game_service.GetGameById(
-            game_pb2.GetGameByIdRequest(game_id=game_id)
-        )
-        logger.debug('game present')
-    except Exception:
-        logger.debug('game not found')
-        await websocket.close(reason='not found')
+    game = await _fetch_game(game_service=game_service, game_id=game_id)
+    if not game:
+        await websocket.close()
         return
 
     try:

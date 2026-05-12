@@ -112,20 +112,22 @@ async def _game_loop(
             continue
 
         game = move_response.game
-        await connections[game.player1].send_text(
-            GameStateMessage(
-                body=GameStateMessageBody(
-                    game_state=json.loads(move_response.player1_view)
-                )
-            ).model_dump_json()
-        )
-        await connections[game.player2].send_text(
-            GameStateMessage(
-                body=GameStateMessageBody(
-                    game_state=json.loads(move_response.player2_view)
-                )
-            ).model_dump_json()
-        )
+        if ws := connections.get(game.player1):
+            await ws.send_text(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(move_response.player1_view)
+                    )
+                ).model_dump_json()
+            )
+        if ws := connections.get(game.player2):
+            await ws.send_text(
+                GameStateMessage(
+                    body=GameStateMessageBody(
+                        game_state=json.loads(move_response.player2_view)
+                    )
+                ).model_dump_json()
+            )
 
 
 async def _fetch_game(

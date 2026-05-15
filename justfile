@@ -65,6 +65,7 @@ connect-to-db APP:
 	docker compose exec -it {{APP}}-postgres psql -U duo_{{APP}} -d duo_{{APP}}
 
 
+# linux/mac only: on windows use 'for /d /r . %d in (__pycache__) do @rd /s /q "%d" & del /s /q *.pyc'
 clean:
     find . -type d -name __pycache__ -exec rm -rf {} +
     find . -name "*.pyc" -delete

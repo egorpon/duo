@@ -28,10 +28,19 @@ uv sync
 Each service has an `.env.example` — copy them all:
 
 ```bash
+# linux/mac
 cp services/auth/.env.example services/auth/.env
 cp services/game/.env.example services/game/.env
 cp services/api/.env.example  services/api/.env
 cp services/ui/.env.example   services/ui/.env
+```
+
+```powershell
+# windows
+copy services\auth\.env.example services\auth\.env
+copy services\game\.env.example services\game\.env
+copy services\api\.env.example  services\api\.env
+copy services\ui\.env.example   services\ui\.env
 ```
 
 Defaults should work for local development without modification.
@@ -47,7 +56,7 @@ python ./scripts/generate_key_pair_for_auth.py
 This creates `ed25519` and `ed25519.pub` in the current directory. Distribute them:
 
 ```bash
-# auth gets both keys
+# linux/mac — auth gets both keys
 cp ed25519     services/auth/keys/ed25519
 cp ed25519.pub services/auth/keys/ed25519.pub
 
@@ -56,10 +65,19 @@ cp ed25519.pub services/game/keys/ed25519.pub
 cp ed25519.pub services/api/keys/ed25519.pub
 ```
 
+```powershell
+# windows
+copy ed25519     services\auth\keys\ed25519
+copy ed25519.pub services\auth\keys\ed25519.pub
+copy ed25519.pub services\game\keys\ed25519.pub
+copy ed25519.pub services\api\keys\ed25519.pub
+```
+
 Delete the root-level copies when done:
 
 ```bash
-rm ed25519 ed25519.pub
+rm ed25519 ed25519.pub          # linux/mac
+del ed25519 ed25519.pub         # windows
 ```
 
 ### 4. Generate gRPC code from proto files

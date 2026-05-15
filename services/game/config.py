@@ -30,7 +30,7 @@ class GameSettings(BaseSettings):
         default='localhost:50052',
     )
 
-    public_key_path: Path = Field(alias='duo_auth_public_key_path')
+    public_key_path: Path = Field(alias='duo_game_public_key_path')
     _public_key: Ed25519PublicKey | None = None
 
     @property

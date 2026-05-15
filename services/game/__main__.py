@@ -32,8 +32,12 @@ async def serve() -> None:
         stop_event.set()
 
     loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGTERM, handle_signal)
-    loop.add_signal_handler(signal.SIGINT, handle_signal)
+    try:
+        loop.add_signal_handler(signal.SIGTERM, handle_signal)
+        loop.add_signal_handler(signal.SIGINT, handle_signal)
+    except NotImplementedError:
+        # windows does not have this function
+        pass
 
     await stop_event.wait()
 

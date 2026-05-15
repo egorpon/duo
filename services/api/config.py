@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from pydantic import AnyUrl, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from common.secrets import load_public_key
@@ -21,8 +21,8 @@ class ApiSettings(BaseSettings):
 
     debug: bool = Field(alias='duo_api_debug')
     allowed_origins: list[str] = Field(alias='duo_allowed_origins')
-    auth_service_url: AnyUrl = Field(alias='duo_auth_service_url')
-    game_service_url: AnyUrl = Field(alias='duo_game_service_url')
+    auth_service_url: str = Field(alias='duo_auth_service_url')
+    game_service_url: str = Field(alias='duo_game_service_url')
 
     jwt_algorithm: str = 'EdDSA'
     public_key_path: Path = Field(alias='duo_api_public_key_path')

@@ -12,7 +12,7 @@ services:
     volumes:
       - /opt/duo/keys/api/:/keys/:ro
     restart: unless-stopped
-    command: python -m services.api
+    command: gunicorn -c services/api/gunicorn_conf.py services.api.main:app
 
   auth:
     image: ghcr.io/voinovvladyslav/duo-auth:latest

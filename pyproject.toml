@@ -28,8 +28,14 @@ dev = [
     "basedpyright>=1.37.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.1.0",
+    {include-group = "grpc"}
+]
+grpc = [
     "grpcio-tools>=1.76.0",
     "mypy-protobuf>=5.0.0",
+]
+production = [
+    "gunicorn>=26.0.0",
 ]
 
 

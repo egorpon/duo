@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN uv sync --frozen --no-cache --group dev
+RUN uv sync --frozen --no-cache --no-group dev --group grpc
 
 RUN mkdir -p generated && \
     cp ./proto/*.proto ./generated/ && \
@@ -16,7 +16,7 @@ RUN mkdir -p generated && \
     --grpc_python_out=. ./generated/*.proto \
     && rm ./generated/*.proto
 
-RUN uv sync --frozen --no-cache --no-group dev
+RUN uv sync --frozen --no-cache --group production --no-group dev
 
 
 FROM python:3.14-alpine

@@ -11,5 +11,5 @@ if __name__ == '__main__':
         reload=True,
         log_config=get_logging_config(loggin_config_path),
         port=8000,
-        host="0.0.0.0",
+        host='0.0.0.0',
     )

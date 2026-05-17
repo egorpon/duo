@@ -5,7 +5,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from services.game.config import settings
 
-_engine = create_async_engine(str(settings.db_dsn))
+_engine = create_async_engine(
+    str(settings.db_dsn),
+    pool_size=settings.db_pool_size,
+    max_overflow=settings.db_max_overflow,
+)
 
 
 def get_async_engine() -> AsyncEngine:

@@ -29,6 +29,8 @@ class GameSettings(BaseSettings):
         alias='duo_game_server_url',
         default='localhost:50052',
     )
+    db_pool_size: int = Field(alias='duo_game_db_pool_size', default=5)
+    db_max_overflow: int = Field(alias='duo_game_db_max_overflow', default=2)
 
     public_key_path: Path = Field(alias='duo_game_public_key_path')
     _public_key: Ed25519PublicKey | None = None

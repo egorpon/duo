@@ -11,3 +11,4 @@ services:
 
 volumes:
   auth-postgres:
+    name: duo-auth-postgres

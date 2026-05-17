@@ -1,4 +1,4 @@
-name: duo-app
+name: duo
 
 include:
   - infra.yml

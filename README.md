@@ -133,6 +133,54 @@ proto/      Source .proto files (generated output → generated/)
 scripts/    Developer utilities
 ```
 
+## Docker local setup
+
+Runs all Python services + databases in Docker. No local Python needed. UI still runs on host.
+
+### 1. Copy environment files
+
+Same as local setup — copy `.env.example` for each service.
+
+### 2. Generate Ed25519 key pair
+
+Same as local setup — run `scripts/generate_key_pair_for_auth.py` and distribute keys.
+
+### 3. Start everything
+
+```bash
+docker compose up -d
+```
+
+Starts databases + api/auth/game services. Services mount `./services/` for live reload.
+
+### 4. Apply migrations
+
+```bash
+docker compose exec auth python -m alembic -c services/auth/alembic.ini upgrade head
+docker compose exec game python -m alembic -c services/game/alembic.ini upgrade head
+```
+
+### 5. Set up and run UI
+
+```bash
+just ui install
+just ui dev     # React frontend :5173
+```
+
+Open `http://localhost:5173`.
+
+---
+
+## Docker deploy
+
+Requires keys in `/opt/duo/keys/{api,auth,game}/` and `.env` at repo root.
+
+```bash
+docker compose -f compose.prod.yml up -d
+```
+
+All services use `network_mode: host` — they reach bare-metal Postgres on `localhost`.
+
 ## Development
 
 ```bash

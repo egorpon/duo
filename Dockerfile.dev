@@ -5,17 +5,16 @@ RUN apk add --no-cache protobuf-dev
 
 WORKDIR /app
 
-COPY . .
-
+COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-cache --no-group dev --group grpc
 
+COPY . .
 
 RUN mkdir -p generated && \
     cp ./proto/*.proto ./generated/ && \
     uv run python -m grpc_tools.protoc -I . --python_out=. \
     --grpc_python_out=. ./generated/*.proto \
     && rm ./generated/*.proto
-
 
 ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000

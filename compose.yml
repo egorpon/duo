@@ -5,7 +5,7 @@ include:
 
 services:
   api:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
@@ -18,10 +18,14 @@ services:
     volumes:
       - ./services/api/keys/:/keys/:ro
       - ./services/:/app/services/:ro
+    depends_on:
+      - auth
+      - game
+    restart: unless-stopped
     command: python -m services.api
 
   auth:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     env_file: services/auth/.env
@@ -34,10 +38,14 @@ services:
     volumes:
       - ./services/auth/keys/:/keys/:ro
       - ./services/:/app/services/:ro
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    restart: unless-stopped
     command: python -m services.auth
 
   game:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     env_file: services/game/.env
@@ -49,4 +57,8 @@ services:
     volumes:
       - ./services/game/keys/:/keys/:ro
       - ./services/:/app/services/:ro
+    depends_on:
+      game-postgres:
+        condition: service_healthy
+    restart: unless-stopped
     command: python -m services.game

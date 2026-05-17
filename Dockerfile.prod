@@ -6,9 +6,10 @@ RUN apk add --no-cache protobuf-dev
 
 WORKDIR /app
 
-COPY . .
-
+COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-cache --no-group dev --group grpc
+
+COPY . .
 
 RUN mkdir -p generated && \
     cp ./proto/*.proto ./generated/ && \
@@ -21,12 +22,16 @@ RUN uv sync --frozen --no-cache --no-group dev --group production --no-group grp
 
 FROM python:3.14-alpine
 
-ENV PYTHONUNBUFFERED=1
-ENV PATH="/app/.venv/bin:$PATH"
-EXPOSE 8000
-
 WORKDIR /app
 
-COPY --from=builder /app /app
+ENV PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
+
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/services /app/services
+COPY --from=builder /app/common /app/common
+COPY --from=builder /app/generated /app/generated
+
+EXPOSE 8000
 
 CMD ["echo", "no CMD"]

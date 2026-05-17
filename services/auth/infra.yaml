@@ -8,6 +8,11 @@ services:
       - "25432:5432"
     volumes:
       - auth-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   auth-postgres:

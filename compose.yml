@@ -1,18 +1,58 @@
+name: duo-app
+
 services:
   api:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     environment:
       - DUO_API_DEBUG=true
       - DUO_ALLOWED_ORIGINS=["http://localhost:5173"]
-      - DUO_AUTH_SERVICE_URL=localhost:50051
-      - DUO_GAME_SERVICE_URL=localhost:50052
+      - DUO_AUTH_SERVICE_URL=auth:50051
+      - DUO_GAME_SERVICE_URL=game:50052
       - DUO_API_PUBLIC_KEY_PATH=/keys/ed25519.pub
     volumes:
-      - type: bind
-        source: ./services/api/keys/
-        target: /keys/
-        read_only: true
-    command: gunicorn services.api.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+      - ./services/api/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    command: python -m services.api
 
+  auth:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DUO_AUTH_SERVER_URL=0.0.0.0:50051
+      - DUO_AUTH_PRIVATE_KEY_PATH=/keys/ed25519
+      - DUO_AUTH_PUBLIC_KEY_PATH=/keys/ed25519.pub
+      - POSTGRES_HOST=host.docker.internal
+      - POSTGRES_PORT=25432
+      - POSTGRES_DB=duo_auth
+      - POSTGRES_USER=duo_auth
+      - POSTGRES_PASSWORD=strongpassword
+    volumes:
+      - ./services/auth/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    command: python -m services.auth
+
+  game:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DUO_GAME_SERVER_URL=0.0.0.0:50052
+      - DUO_GAME_PUBLIC_KEY_PATH=/keys/ed25519.pub
+      - POSTGRES_HOST=host.docker.internal
+      - POSTGRES_PORT=25433
+      - POSTGRES_DB=duo_game
+      - POSTGRES_USER=duo_game
+      - POSTGRES_PASSWORD=strongpassword
+    volumes:
+      - ./services/game/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    command: python -m services.game

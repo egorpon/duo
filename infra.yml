@@ -1,4 +1,4 @@
-name: 'duo'
+name: duo-infra
 include:
   - ./services/auth/infra.yaml
   - ./services/game/infra.yaml

@@ -10,4 +10,6 @@ if __name__ == '__main__':
         'services.api.main:app',
         reload=True,
         log_config=get_logging_config(loggin_config_path),
+        port=8000,
+        host="0.0.0.0",
     )

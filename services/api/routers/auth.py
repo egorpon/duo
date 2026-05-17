@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
@@ -12,6 +13,8 @@ from services.api.schemas.auth import (
 )
 
 router = APIRouter(tags=['auth'])
+
+logger = logging.getLogger('duo.api.auth')
 
 
 @router.post('/register/')
@@ -65,19 +68,18 @@ async def user_login(
             expires_at=resp.expires_at.ToDatetime().timestamp(),
         )
     except aio.AioRpcError as exc:
-        if exc.code() == StatusCode.UNAUTHENTICATED:
+        if exc.code() in [
+            StatusCode.UNAUTHENTICATED,
+            StatusCode.INVALID_ARGUMENT,
+            StatusCode.NOT_FOUND,
+        ]:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail='Invalid email or password',
             )
 
-        if exc.code() == StatusCode.INVALID_ARGUMENT:
-            raise HTTPException(
-                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                detail='Invalid email or password',
-            )
-
+        logger.exception('internal server error')
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail='Internal error',
         )

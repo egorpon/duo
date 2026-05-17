@@ -1,10 +1,8 @@
-FROM python:3.14-slim-bookworm AS builder
+FROM python:3.14-alpine AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.14 /uv /uvx /bin/
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends protobuf-compiler && \ 
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache protobuf-dev
 
 WORKDIR /app
 
@@ -21,7 +19,7 @@ RUN mkdir -p generated && \
 RUN uv sync --frozen --no-cache --no-group dev
 
 
-FROM python:3.14-slim-bookworm
+FROM python:3.14-alpine
 
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"

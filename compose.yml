@@ -1,0 +1,18 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DUO_API_DEBUG=true
+      - DUO_ALLOWED_ORIGINS=["http://localhost:5173"]
+      - DUO_AUTH_SERVICE_URL=localhost:50051
+      - DUO_GAME_SERVICE_URL=localhost:50052
+      - DUO_API_PUBLIC_KEY_PATH=/keys/ed25519.pub
+    volumes:
+      - type: bind
+        source: ./services/api/keys/
+        target: /keys/
+        read_only: true
+    command: uvicorn services.api.main:app --port 8000 --host 0.0.0.0
+

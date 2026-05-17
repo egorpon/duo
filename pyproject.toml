@@ -36,6 +36,7 @@ grpc = [
 ]
 production = [
     "gunicorn>=26.0.0",
+    "uvicorn-worker>=0.4.0",
 ]
 
 

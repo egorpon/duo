@@ -14,5 +14,5 @@ services:
         source: ./services/api/keys/
         target: /keys/
         read_only: true
-    command: uvicorn services.api.main:app --port 8000 --host 0.0.0.0
+    command: gunicorn services.api.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
 

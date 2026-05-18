@@ -2,7 +2,7 @@ name: duo-app
 
 services:
   api:
-    image: ghcr.io/voinovvladyslav/duo-api:latest
+    image: ghcr.io/voinovvladyslav/duo:demo
     network_mode: host
     env_file: .env
     environment:
@@ -15,29 +15,35 @@ services:
     command: gunicorn -c services/api/gunicorn_conf.py services.api.main:app
 
   auth:
-    image: ghcr.io/voinovvladyslav/duo-auth:latest
+    image: ghcr.io/voinovvladyslav/duo:demo
     network_mode: host
     env_file: .env
     environment:
       - DUO_AUTH_SERVER_URL=0.0.0.0:50051
       - DUO_AUTH_PRIVATE_KEY_PATH=/keys/ed25519
       - DUO_AUTH_PUBLIC_KEY_PATH=/keys/ed25519.pub
-      - POSTGRES_HOST=localhost
-      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=${AUTH_POSTGRES_HOST}
+      - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
+      - POSTGRES_DB=${AUTH_POSTGRES_DB}
+      - POSTGRES_USER=${AUTH_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
     volumes:
       - /opt/duo/keys/auth/:/keys/:ro
     restart: unless-stopped
     command: python -m services.auth
 
   game:
-    image: ghcr.io/voinovvladyslav/duo-game:latest
+    image: ghcr.io/voinovvladyslav/duo:demo
     network_mode: host
     env_file: .env
     environment:
       - DUO_GAME_SERVER_URL=0.0.0.0:50052
       - DUO_GAME_PUBLIC_KEY_PATH=/keys/ed25519.pub
-      - POSTGRES_HOST=localhost
-      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=${GAME_POSTGRES_HOST}
+      - POSTGRES_PORT=${GAME_POSTGRES_PORT}
+      - POSTGRES_DB=${GAME_POSTGRES_DB}
+      - POSTGRES_USER=${GAME_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${GAME_POSTGRES_PASSWORD}
     volumes:
       - /opt/duo/keys/game/:/keys/:ro
     restart: unless-stopped

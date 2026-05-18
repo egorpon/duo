@@ -35,10 +35,20 @@
             "filters": ["keyword"]
         }
     },
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["stdout"]
+    },
     "loggers": {
-        "root": {
-            "level": "DEBUG",
-            "handlers": ["stdout"]
+        "gunicorn.error": {
+            "level": "INFO",
+            "handlers": ["stdout"],
+            "propagate": false
+        },
+        "gunicorn.access": {
+            "level": "INFO",
+            "handlers": ["stdout"],
+            "propagate": false
         }
     }
 }

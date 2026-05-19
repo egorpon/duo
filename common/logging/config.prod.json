@@ -30,7 +30,7 @@
     "handlers": {
         "stdout": {
             "class": "logging.StreamHandler",
-            "formatter": "color",
+            "formatter": "simple",
             "stream": "ext://sys.stdout",
             "filters": ["keyword"]
         }
@@ -38,6 +38,18 @@
     "root": {
         "level": "DEBUG",
         "handlers": ["stdout"]
+    },
+    "loggers": {
+        "gunicorn.error": {
+            "level": "INFO",
+            "handlers": ["stdout"],
+            "propagate": false
+        },
+        "gunicorn.access": {
+            "level": "INFO",
+            "handlers": ["stdout"],
+            "propagate": false
+        }
     }
 }
 

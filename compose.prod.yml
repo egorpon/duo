@@ -2,49 +2,43 @@ name: duo-app
 
 services:
   api:
-    image: ghcr.io/voinovvladyslav/duo:demo
+    image: ghcr.io/voinovvladyslav/duo:${IMAGE_TAG:-latest}
     network_mode: host
     env_file: .env
-    environment:
-      - DUO_AUTH_SERVICE_URL=localhost:50051
-      - DUO_GAME_SERVICE_URL=localhost:50052
-      - DUO_API_PUBLIC_KEY_PATH=/keys/ed25519.pub
     volumes:
-      - /opt/duo/keys/api/:/keys/:ro
+      - ${API_KEY_PATH:-/opt/duo/keys/api/}:/keys/:ro
     restart: unless-stopped
-    command: gunicorn -c services/api/gunicorn_conf.py services.api.main:app
+    command: >
+      gunicorn -c services/api/gunicorn_conf.py 
+      --bind ${GUNICORN_BIND:-0.0.0.0:8000}
+      services.api.main:app 
 
   auth:
-    image: ghcr.io/voinovvladyslav/duo:demo
+    image: ghcr.io/voinovvladyslav/duo:${IMAGE_TAG:-latest}
     network_mode: host
     env_file: .env
     environment:
-      - DUO_AUTH_SERVER_URL=0.0.0.0:50051
-      - DUO_AUTH_PRIVATE_KEY_PATH=/keys/ed25519
-      - DUO_AUTH_PUBLIC_KEY_PATH=/keys/ed25519.pub
       - POSTGRES_HOST=${AUTH_POSTGRES_HOST}
       - POSTGRES_PORT=${AUTH_POSTGRES_PORT}
       - POSTGRES_DB=${AUTH_POSTGRES_DB}
       - POSTGRES_USER=${AUTH_POSTGRES_USER}
       - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
     volumes:
-      - /opt/duo/keys/auth/:/keys/:ro
+      - ${AUTH_KEY_PATH:-/opt/duo/keys/auth/}:/keys/:ro
     restart: unless-stopped
     command: python -m services.auth
 
   game:
-    image: ghcr.io/voinovvladyslav/duo:demo
+    image: ghcr.io/voinovvladyslav/duo:${IMAGE_TAG:-latest}
     network_mode: host
     env_file: .env
     environment:
-      - DUO_GAME_SERVER_URL=0.0.0.0:50052
-      - DUO_GAME_PUBLIC_KEY_PATH=/keys/ed25519.pub
       - POSTGRES_HOST=${GAME_POSTGRES_HOST}
       - POSTGRES_PORT=${GAME_POSTGRES_PORT}
       - POSTGRES_DB=${GAME_POSTGRES_DB}
       - POSTGRES_USER=${GAME_POSTGRES_USER}
       - POSTGRES_PASSWORD=${GAME_POSTGRES_PASSWORD}
     volumes:
-      - /opt/duo/keys/game/:/keys/:ro
+      - ${GAME_KEY_PATH:-/opt/duo/keys/game/}:/keys/:ro
     restart: unless-stopped
     command: python -m services.game

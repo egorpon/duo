@@ -1,8 +1,7 @@
 import pytest
-from _pytest.nodes import Item
 
 
-def pytest_collection_modifyitems(items: list[Item]) -> None:
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     for item in items:
         parts = item.path.parts
 

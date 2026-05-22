@@ -43,3 +43,4 @@ services:
       - ${GAME_KEY_PATH:-/opt/duo/keys/game/}:/keys/:ro
     restart: unless-stopped
     command: python -m services.game
+

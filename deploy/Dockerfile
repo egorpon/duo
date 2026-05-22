@@ -34,4 +34,3 @@ COPY --from=builder /app/services /app/services
 COPY --from=builder /app/common /app/common
 COPY --from=builder /app/generated /app/generated
 
-

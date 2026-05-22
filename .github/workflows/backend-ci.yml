@@ -3,26 +3,28 @@ name: checks-backend
 on:
   push:
     branches: [main]
+    tags: ['*']
+    paths-ignore: ['services/ui/**']
   pull_request:
     branches: [main]
-  workflow_call:
+    paths-ignore: ['services/ui/**']
 
 jobs:
-  checks-backend:
+  checks:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up uv
+      - name: set up uv
         uses: astral-sh/setup-uv@v8.1.0
         with:
           enable-cache: true  # caches based on uv.lock automatically
 
-      - name: Install dependencies
+      - name: install dependencies
         run: uv sync --frozen
       
-      - name: Generate Proto
+      - name: generate proto
         run: |
           cp ./proto/*.proto ./generated/
           uv run python \
@@ -36,15 +38,75 @@ jobs:
           rm ./generated/*.proto
 
 
-      - name: Format
+      - name: format
         run: uv run ruff format --check
 
-      - name: Lint
+      - name: lint
         run: uv run ruff check
 
-      - name: Type check
+      - name: type check
         run: uv run basedpyright
 
-      - name: Tests
+      - name: tests
         run: uv run pytest
+      
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [checks]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: voinovvladyslav
+          password: ${{ secrets.CONTAINER_REGISTRY_ACCESS_TOKEN }}
+
+      - name: build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          push: true
+          tags: ghcr.io/voinovvladyslav/duo:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: setup ssh key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: sync files
+        run: |
+          rsync -az \
+          deploy/compose.yml \
+          ${{ secrets.SERVER_USER }}@${{secrets.SERVER_HOST }}:/opt/duo/
+
+      - name: deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/duo/
+            IMAGE_TAG=${{ github.ref_name }} docker compose pull
+            IMAGE_TAG=${{ github.ref_name }} docker compose up -d
+            docker image prune -f
 

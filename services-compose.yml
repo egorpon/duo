@@ -1,0 +1,58 @@
+name: duo
+
+include:
+  - compose.yml
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: services/api/.env
+    environment:
+      - DUO_AUTH_SERVICE_URL=auth:50051
+      - DUO_GAME_SERVICE_URL=game:50052
+      - DUO_API_PUBLIC_KEY_PATH=/keys/ed25519.pub
+    volumes:
+      - ./services/api/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    depends_on:
+      - auth
+      - game
+    restart: unless-stopped
+    command: python -m services.api
+
+  auth:
+    build: .
+    env_file: services/auth/.env
+    environment:
+      - DUO_AUTH_SERVER_URL=0.0.0.0:50051
+      - DUO_AUTH_PRIVATE_KEY_PATH=/keys/ed25519
+      - DUO_AUTH_PUBLIC_KEY_PATH=/keys/ed25519.pub
+      - POSTGRES_HOST=auth-postgres
+      - POSTGRES_PORT=5432
+    volumes:
+      - ./services/auth/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python -m services.auth
+
+  game:
+    build: .
+    env_file: services/game/.env
+    environment:
+      - DUO_GAME_SERVER_URL=0.0.0.0:50052
+      - DUO_GAME_PUBLIC_KEY_PATH=/keys/ed25519.pub
+      - POSTGRES_HOST=game-postgres
+      - POSTGRES_PORT=5432
+    volumes:
+      - ./services/game/keys/:/keys/:ro
+      - ./services/:/app/services/:ro
+    depends_on:
+      game-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python -m services.game

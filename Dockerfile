@@ -10,13 +10,13 @@ RUN uv sync --frozen --no-cache --no-group dev --group grpc
 
 COPY . .
 
+ENV PATH="/app/.venv/bin:$PATH"
 RUN mkdir -p generated && \
     cp ./proto/*.proto ./generated/ && \
-    uv run python -m grpc_tools.protoc -I . --python_out=. \
+    python -m grpc_tools.protoc -I . --python_out=. \
     --grpc_python_out=. ./generated/*.proto \
     && rm ./generated/*.proto
 
-ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
 CMD ["echo", "no CMD"]

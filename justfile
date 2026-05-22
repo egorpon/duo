@@ -33,13 +33,13 @@ run APP:
 ui *ARGS:
     cd ./services/ui/; pnpm {{ARGS}}
 
-# starts infra in docker
+# starts all services with infra in docker
 up:
-    docker compose -f infra.yml up -d
+    docker compose -f services-compose.yml up -d
 
-# stops infra in docker
+# stops all services with infra in docker
 down:
-    docker compose -f infra.yml down
+    docker compose -f services-compose.yml down
 
 generate-proto:
 	cp ./proto/*.proto ./generated/

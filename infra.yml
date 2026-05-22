@@ -1,5 +1,0 @@
-name: duo
-include:
-  - ./services/auth/infra.yaml
-  - ./services/game/infra.yaml
-

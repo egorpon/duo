@@ -2,6 +2,7 @@
 
 This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
 
+
 ## Adding components
 
 To add components to your app, run the following command:

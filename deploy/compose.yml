@@ -11,6 +11,7 @@ services:
     command: >
       gunicorn -c services/api/gunicorn_conf.py 
       --bind ${GUNICORN_BIND:-0.0.0.0:8000}
+      -w 1
       services.api.main:app 
 
   auth:

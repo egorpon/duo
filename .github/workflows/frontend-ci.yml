@@ -7,7 +7,7 @@ on:
     paths: ['services/ui/**']
   pull_request:
     branches: [main]
-    paths: ['services/ui/**']
+    paths: ['services/ui/**', '.github/workflows/frontend-ci.yml']
 
 jobs:
   checks:

@@ -13,6 +13,8 @@ from services.api.routers.users import router as users_router
 from services.api.routers.websockets import router as ws_router
 
 if settings.sentry_dsn:
+    import os
+
     import sentry_sdk
     from sentry_sdk.integrations.fastapi import FastApiIntegration
     from sentry_sdk.integrations.grpc import GRPCIntegration
@@ -25,6 +27,8 @@ if settings.sentry_dsn:
         send_default_pii=True,
         auto_enabling_integrations=False,
         traces_sample_rate=0,
+        environment=os.getenv('SENTRY_ENVIRONMENT', 'production'),
+        release=os.getenv('SENTRY_RELEASE'),
         integrations=[
             FastApiIntegration(),
             LoggingIntegration(),

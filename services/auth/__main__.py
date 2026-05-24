@@ -12,6 +12,8 @@ from services.auth.service import UserService
 logger = logging.getLogger('duo.auth')
 
 if settings.sentry_dsn:
+    import os
+
     import sentry_sdk
     from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
     from sentry_sdk.integrations.grpc import GRPCIntegration
@@ -23,6 +25,8 @@ if settings.sentry_dsn:
         send_default_pii=True,
         auto_enabling_integrations=False,
         traces_sample_rate=0,
+        environment=os.getenv('SENTRY_ENVIRONMENT', 'production'),
+        release=os.getenv('SENTRY_RELEASE'),
         integrations=[
             AsyncPGIntegration(),
             GRPCIntegration(),

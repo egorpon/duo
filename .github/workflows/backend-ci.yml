@@ -108,8 +108,10 @@ jobs:
             cd /opt/duo/
             IMAGE_TAG=${{ github.ref_name }} docker compose pull
             IMAGE_TAG=${{ github.ref_name }} docker compose down
-            IMAGE_TAG=${{ github.ref_name }} docker compose run --rm -rf auth alembic -c ./services/auth/alembic.ini upgrade head
-            IMAGE_TAG=${{ github.ref_name }} docker compose run --rm -rf game alembic -c ./services/game/alembic.ini upgrade head
+            IMAGE_TAG=${{ github.ref_name }} \
+            docker compose run --rm auth alembic -c ./services/auth/alembic.ini upgrade head
+            IMAGE_TAG=${{ github.ref_name }} \
+            docker compose run --rm game alembic -c ./services/game/alembic.ini upgrade head
             IMAGE_TAG=${{ github.ref_name }} docker compose up -d
             docker image prune -af
 

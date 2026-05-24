@@ -5,13 +5,14 @@ services:
     image: ghcr.io/voinovvladyslav/duo:${IMAGE_TAG:-latest}
     network_mode: host
     env_file: .env
+    environment:
+      - SENTRY_RELEASE=${IMAGE_TAG}
     volumes:
       - ${API_KEY_PATH:-/opt/duo/keys/api/}:/keys/:ro
     restart: unless-stopped
     command: >
       gunicorn -c services/api/gunicorn_conf.py 
       --bind ${GUNICORN_BIND:-0.0.0.0:8000}
-      -w 1
       services.api.main:app 
 
   auth:
@@ -24,6 +25,7 @@ services:
       - POSTGRES_DB=${AUTH_POSTGRES_DB}
       - POSTGRES_USER=${AUTH_POSTGRES_USER}
       - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+      - SENTRY_RELEASE=${IMAGE_TAG}
     volumes:
       - ${AUTH_KEY_PATH:-/opt/duo/keys/auth/}:/keys/:ro
     restart: unless-stopped
@@ -39,6 +41,7 @@ services:
       - POSTGRES_DB=${GAME_POSTGRES_DB}
       - POSTGRES_USER=${GAME_POSTGRES_USER}
       - POSTGRES_PASSWORD=${GAME_POSTGRES_PASSWORD}
+      - SENTRY_RELEASE=${IMAGE_TAG}
     volumes:
       - ${GAME_KEY_PATH:-/opt/duo/keys/game/}:/keys/:ro
     restart: unless-stopped

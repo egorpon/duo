@@ -72,6 +72,10 @@ jobs:
         run: cp .env.prod .env
 
       - name: build project
+        env:
+          VITE_SENTRY_DSN: ${{ secrets.UI_SENTRY_DSN }}
+          VITE_SENTRY_ENVIRONMENT: production
+          VITE_SENTRY_RELEASE: ${{ github.ref_name }}
         run: pnpm run build
 
       - name: save build artifacts

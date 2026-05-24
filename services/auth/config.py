@@ -23,6 +23,9 @@ class AuthSettings(BaseSettings):
     )
     private_key_path: Path = Field(alias='duo_auth_private_key_path')
     public_key_path: Path = Field(alias='duo_auth_public_key_path')
+    _private_key: Ed25519PrivateKey | None = None
+    _public_key: Ed25519PublicKey | None = None
+
     jwt_lifetime: int = 60 * 60 * 24 * 30  # 30 days
     jwt_algorithm: str = 'EdDSA'
 
@@ -32,14 +35,15 @@ class AuthSettings(BaseSettings):
     db_user: str = Field(alias='postgres_user')
     db_pass: SecretStr = Field(alias='postgres_password')
 
-    _private_key: Ed25519PrivateKey | None = None
-    _public_key: Ed25519PublicKey | None = None
+    db_pool_size: int = Field(alias='duo_auth_db_pool_size', default=5)
+    db_max_overflow: int = Field(alias='duo_auth_db_max_overflow', default=2)
+    
+    sentry_dsn: str = Field(alias='duo_auth_sentry_dsn', default='')
+
     server_url: str = Field(
         alias='duo_auth_server_url',
         default='localhost:50051',
     )
-    db_pool_size: int = Field(alias='duo_auth_db_pool_size', default=5)
-    db_max_overflow: int = Field(alias='duo_auth_db_max_overflow', default=2)
 
     @property
     def db_dsn(self) -> PostgresDsn:

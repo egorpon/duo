@@ -18,22 +18,24 @@ class GameSettings(BaseSettings):
         env_file=BASE_PATH / '.env',
         extra='ignore',
     )
+    jwt_algorithm: str = 'EdDSA'
+    server_url: str = Field(
+        alias='duo_game_server_url',
+        default='localhost:50052',
+    )
 
     db_host: str = Field(alias='postgres_host')
     db_port: str = Field(alias='postgres_port')
     db_name: str = Field(alias='postgres_db')
     db_user: str = Field(alias='postgres_user')
     db_pass: SecretStr = Field(alias='postgres_password')
-    jwt_algorithm: str = 'EdDSA'
-    server_url: str = Field(
-        alias='duo_game_server_url',
-        default='localhost:50052',
-    )
     db_pool_size: int = Field(alias='duo_game_db_pool_size', default=5)
     db_max_overflow: int = Field(alias='duo_game_db_max_overflow', default=2)
 
     public_key_path: Path = Field(alias='duo_game_public_key_path')
     _public_key: Ed25519PublicKey | None = None
+
+    sentry_dsn: str = Field(alias='duo_game_sentry_dsn', default='')
 
     @property
     def db_dsn(self) -> PostgresDsn:

@@ -13,6 +13,26 @@ from services.game.grpc.services.game_move import GameMoveService
 logger = logging.getLogger('duo.game')
 
 
+if settings.sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
+    from sentry_sdk.integrations.grpc import GRPCIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        send_default_pii=True,
+        auto_enabling_integrations=False,
+        traces_sample_rate=0,
+        integrations=[
+            AsyncPGIntegration(),
+            GRPCIntegration(),
+            LoggingIntegration(),
+            SqlalchemyIntegration(),
+        ],
+    )
+
 async def serve() -> None:
     interceptors = (AuthInterceptor(),)
     server = aio.server(interceptors=interceptors)

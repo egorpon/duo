@@ -12,6 +12,28 @@ from services.api.routers.games import router as games_router
 from services.api.routers.users import router as users_router
 from services.api.routers.websockets import router as ws_router
 
+if settings.sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.grpc import GRPCIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.starlette import StarletteIntegration
+
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        send_default_pii=True,
+        auto_enabling_integrations=False,
+        traces_sample_rate=0,
+        integrations=[
+            FastApiIntegration(),
+            LoggingIntegration(),
+            RedisIntegration(),
+            StarletteIntegration(),
+            GRPCIntegration(),
+        ],
+    )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

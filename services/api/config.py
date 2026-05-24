@@ -28,6 +28,7 @@ class ApiSettings(BaseSettings):
     public_key_path: Path = Field(alias='duo_api_public_key_path')
     _public_key: Ed25519PublicKey | None = None
     redis_dsn: RedisDsn = Field(alias='duo_api_redis_dsn')
+    sentry_dsn: str = Field(alias='duo_api_sentry_dsn', default='')
 
     @property
     def public_key(self) -> Ed25519PublicKey:

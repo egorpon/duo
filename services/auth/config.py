@@ -37,7 +37,7 @@ class AuthSettings(BaseSettings):
 
     db_pool_size: int = Field(alias='duo_auth_db_pool_size', default=5)
     db_max_overflow: int = Field(alias='duo_auth_db_max_overflow', default=2)
-    
+
     sentry_dsn: str = Field(alias='duo_auth_sentry_dsn', default='')
 
     server_url: str = Field(

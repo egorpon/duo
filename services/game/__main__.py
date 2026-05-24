@@ -37,6 +37,7 @@ if settings.sentry_dsn:
         ],
     )
 
+
 async def serve() -> None:
     interceptors = (AuthInterceptor(),)
     server = aio.server(interceptors=interceptors)

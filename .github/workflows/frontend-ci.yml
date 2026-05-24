@@ -65,8 +65,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: services/ui/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: copy env
+        run: cp .env.prod .env
 
       - name: build project
         run: pnpm run build

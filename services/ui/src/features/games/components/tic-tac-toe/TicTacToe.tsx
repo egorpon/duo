@@ -2,7 +2,7 @@ import useAuthStore from "@/features/auth/stores/auth"
 import type { User } from "@/features/auth/types/user"
 import type { GameMoveMessage } from "@/features/games/types/game"
 import { TicTacToeStateSchema } from "@/features/games/types/tic-tac-toe"
-import type { TicTacToeState } from "@/features/games/types/tic-tac-toe"
+import type { TicTacToeState, Move } from "@/features/games/types/tic-tac-toe"
 import { GameBoard } from "./GameBoard"
 import { GameOverDialog } from "./GameOverDialog"
 import { GameStatus } from "./GameStatus"
@@ -14,29 +14,38 @@ interface Props {
     opponent: User | null
 }
 
+function getStatusText(
+    state: TicTacToeState,
+    userId: number | undefined
+): string {
+    if (state.is_draw) return "It's a draw!"
+    if (state.winner !== null)
+        return state.winner === userId ? "You win!" : "Opponent wins!"
+    return state.your_turn ? "Your turn" : "Opponent's turn"
+}
+
+function getDialogTitle(
+    state: TicTacToeState,
+    userId: number | undefined
+): string {
+    if (state.is_draw) return "It's a draw!"
+    if (state.winner !== null)
+        return state.winner === userId ? "You win!" : "You lost!"
+    return ""
+}
+
+function opponentSymbol(yourSymbol: Move): Move {
+    return yourSymbol === "x" ? "o" : "x"
+}
+
 export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
-    const user = useAuthStore((state) => state.user)
+    const userId = useAuthStore((state) => state.user?.id)
     const { data } = TicTacToeStateSchema.safeParse(gameState)
     if (data === undefined) {
         return <div>Failed to parse game state</div>
     }
     const state: TicTacToeState = data!
-
     const isOver = state.winner !== null || state.is_draw
-
-    const getStatusText = () => {
-        if (state.is_draw) return "It's a draw!"
-        if (state.winner !== null)
-            return state.winner === user?.id ? "You win!" : "Opponent wins!"
-        return state.your_turn ? "Your turn" : "Opponent's turn"
-    }
-
-    const getDialogTitle = () => {
-        if (state.is_draw) return "It's a draw!"
-        if (state.winner !== null)
-            return state.winner === user?.id ? "You win!" : "You lost!"
-        return ""
-    }
 
     const handleClick = (i: number, j: number) => {
         sendMoveHandler({
@@ -47,7 +56,10 @@ export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
 
     return (
         <div className="flex flex-col items-center gap-6 p-8">
-            <GameOverDialog isOver={isOver} title={getDialogTitle()} />
+            <GameOverDialog
+                isOver={isOver}
+                title={getDialogTitle(state, userId)}
+            />
 
             <div className="flex flex-col items-center gap-3">
                 <h2 className="text-2xl font-bold tracking-tight">
@@ -69,7 +81,7 @@ export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
                         className={`flex min-w-0 items-center justify-start gap-1.5 transition-opacity ${!isOver && !state.your_turn ? "opacity-100" : "opacity-40"}`}
                     >
                         <TicTacToeCell
-                            value={state.your_symbol === "x" ? "o" : "x"}
+                            value={opponentSymbol(state.your_symbol)}
                         />
                         <span className="truncate text-sm font-medium text-foreground">
                             {opponent ? opponent.email : "Opponent"}
@@ -81,7 +93,7 @@ export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
             <GameStatus
                 isOver={isOver}
                 yourTurn={state.your_turn}
-                text={getStatusText()}
+                text={getStatusText(state, userId)}
             />
 
             <GameBoard

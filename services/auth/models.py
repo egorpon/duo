@@ -5,8 +5,8 @@ from sqlmodel import Field, SQLModel
 
 
 class TimeStampedModel(SQLModel):
-    created_at: datetime = Field(default_factory=lambda: datetime.now())
-    updated_at: datetime = Field(default_factory=lambda: datetime.now())
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 
 class User(TimeStampedModel, table=True):
@@ -14,6 +14,4 @@ class User(TimeStampedModel, table=True):
 
     email: EmailStr = Field(max_length=200, unique=True)
     hashed_password: str = Field()
-    password_updated_at: datetime = Field(
-        default_factory=lambda: datetime.now()
-    )
+    password_updated_at: datetime = Field(default_factory=datetime.now)

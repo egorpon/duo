@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar/hooks"
 import useAuthStore from "@/features/auth/stores/auth"
-import { Home, Info, PanelLeft, Settings, User2 } from "lucide-react"
+import { Home, PanelLeft, Settings, User2 } from "lucide-react"
 import { Link, useNavigate } from "react-router"
 import {
     DropdownMenu,
@@ -24,7 +24,6 @@ import {
 
 const items = [
     { title: "Home", url: "/", icon: Home },
-    { title: "About", url: "/about", icon: Info },
     { title: "Settings", url: "/settings", icon: Settings },
 ]
 

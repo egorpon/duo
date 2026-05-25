@@ -2,40 +2,16 @@ import useAuthStore from "@/features/auth/stores/auth"
 import type { User } from "@/features/auth/types/user"
 import type { GameMoveMessage } from "@/features/games/types/game"
 import { TicTacToeStateSchema } from "@/features/games/types/tic-tac-toe"
-import type { TicTacToeState, Move } from "@/features/games/types/tic-tac-toe"
 import { GameBoard } from "./GameBoard"
 import { GameOverDialog } from "./GameOverDialog"
 import { GameStatus } from "./GameStatus"
 import { TicTacToeCell } from "./TicTacToeCell"
+import { getDialogTitle, getStatusText, opponentSymbol } from "./utils"
 
 interface Props {
     gameState: any
     sendMoveHandler: (message: GameMoveMessage) => void
     opponent: User | null
-}
-
-function getStatusText(
-    state: TicTacToeState,
-    userId: number | undefined
-): string {
-    if (state.is_draw) return "It's a draw!"
-    if (state.winner !== null)
-        return state.winner === userId ? "You win!" : "Opponent wins!"
-    return state.your_turn ? "Your turn" : "Opponent's turn"
-}
-
-function getDialogTitle(
-    state: TicTacToeState,
-    userId: number | undefined
-): string {
-    if (state.is_draw) return "It's a draw!"
-    if (state.winner !== null)
-        return state.winner === userId ? "You win!" : "You lost!"
-    return ""
-}
-
-function opponentSymbol(yourSymbol: Move): Move {
-    return yourSymbol === "x" ? "o" : "x"
 }
 
 export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
@@ -44,7 +20,7 @@ export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
     if (data === undefined) {
         return <div>Failed to parse game state</div>
     }
-    const state: TicTacToeState = data!
+    const state = data!
     const isOver = state.winner !== null || state.is_draw
 
     const handleClick = (i: number, j: number) => {

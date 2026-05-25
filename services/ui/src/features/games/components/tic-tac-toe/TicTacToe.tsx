@@ -1,4 +1,5 @@
 import useAuthStore from "@/features/auth/stores/auth"
+import type { User } from "@/features/auth/types/user"
 import type { GameMoveMessage } from "@/features/games/types/game"
 import { TicTacToeStateSchema } from "@/features/games/types/tic-tac-toe"
 import type { TicTacToeState } from "@/features/games/types/tic-tac-toe"
@@ -10,9 +11,10 @@ import { TicTacToeCell } from "./TicTacToeCell"
 interface Props {
     gameState: any
     sendMoveHandler: (message: GameMoveMessage) => void
+    opponent: User | null
 }
 
-export function TicTacToe({ gameState, sendMoveHandler }: Props) {
+export function TicTacToe({ gameState, sendMoveHandler, opponent }: Props) {
     const user = useAuthStore((state) => state.user)
     const { data } = TicTacToeStateSchema.safeParse(gameState)
     if (data === undefined) {
@@ -47,13 +49,32 @@ export function TicTacToe({ gameState, sendMoveHandler }: Props) {
         <div className="flex flex-col items-center gap-6 p-8">
             <GameOverDialog isOver={isOver} title={getDialogTitle()} />
 
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
                 <h2 className="text-2xl font-bold tracking-tight">
                     Tic Tac Toe
                 </h2>
-                <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted-foreground">You play as</p>
-                    <TicTacToeCell value={state.your_symbol} />
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                    <div
+                        className={`flex items-center justify-end gap-1.5 transition-opacity ${!isOver && state.your_turn ? "opacity-100" : "opacity-40"}`}
+                    >
+                        <span className="text-sm font-medium text-foreground">
+                            You
+                        </span>
+                        <TicTacToeCell value={state.your_symbol} />
+                    </div>
+                    <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                        vs
+                    </span>
+                    <div
+                        className={`flex min-w-0 items-center justify-start gap-1.5 transition-opacity ${!isOver && !state.your_turn ? "opacity-100" : "opacity-40"}`}
+                    >
+                        <TicTacToeCell
+                            value={state.your_symbol === "x" ? "o" : "x"}
+                        />
+                        <span className="truncate text-sm font-medium text-foreground">
+                            {opponent ? opponent.email : "Opponent"}
+                        </span>
+                    </div>
                 </div>
             </div>
 

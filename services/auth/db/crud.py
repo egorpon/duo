@@ -8,9 +8,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from common.exceptions import InvalidTokenError
 from common.models import model_update
-from services.auth.db import get_session_ctx
+from services.auth.db.engine import get_session_ctx
+from services.auth.db.models import User
 from services.auth.exceptions import EmailAlreadyUsedError
-from services.auth.models import User
 from services.auth.password import hash_password
 from services.auth.token import decode_token
 
@@ -38,7 +38,9 @@ async def get_user_by_email(
 
 
 async def get_user_from_token(
-    session: AsyncSession | None = None, *, token: str
+    session: AsyncSession | None = None,
+    *,
+    token: str,
 ) -> User:
     """
     Get user from token or raise error

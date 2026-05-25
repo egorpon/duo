@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from common.token import ISSUER, TokenDetails
 from common.token import decode_token as _decode_token
 from services.auth.config import settings
-from services.auth.models import User
+from services.auth.db.models import User
 
 
 class Token(BaseModel):

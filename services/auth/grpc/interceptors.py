@@ -5,9 +5,9 @@ from typing import Any, override
 import grpc
 
 from common.exceptions import ExpiredTokenError, InvalidTokenError
+from services.auth.db.crud import get_user_from_token
+from services.auth.db.models import User
 from services.auth.exceptions import UnsupportedGRPCMethodError
-from services.auth.models import User
-from services.auth.queries import get_user_from_token
 
 request_user: ContextVar[User | None] = ContextVar('request_user', default=None)
 

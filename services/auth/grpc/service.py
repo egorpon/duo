@@ -16,15 +16,15 @@ from generated.auth_pb2 import (
     UpdateUserPasswordRequest,
     User,
 )
-from services.auth.exceptions import EmailAlreadyUsedError
-from services.auth.interceptors import get_current_user
-from services.auth.password import check_password
-from services.auth.queries import (
+from services.auth.db.crud import (
     get_user_by_email,
     get_user_by_id,
     user_create,
     user_update,
 )
+from services.auth.exceptions import EmailAlreadyUsedError
+from services.auth.grpc.interceptors import get_current_user
+from services.auth.password import check_password
 from services.auth.token import issue_token
 
 logger = logging.getLogger('duo.auth.grpc')

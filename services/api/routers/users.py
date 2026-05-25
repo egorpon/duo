@@ -40,7 +40,6 @@ async def user_me(
             email=resp.email,
             created_at=resp.created_at.ToDatetime(),
             updated_at=resp.updated_at.ToDatetime(),
-            password_updated_at=resp.password_updated_at.ToDatetime(),
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:
@@ -77,7 +76,6 @@ async def user_detail(
             email=resp.email,
             created_at=resp.created_at.ToDatetime(),
             updated_at=resp.updated_at.ToDatetime(),
-            password_updated_at=resp.password_updated_at.ToDatetime(),
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:
@@ -116,7 +114,6 @@ async def user_update_email(
             email=resp.email,
             created_at=resp.created_at.ToDatetime(),
             updated_at=resp.updated_at.ToDatetime(),
-            password_updated_at=resp.password_updated_at.ToDatetime(),
         )
     except aio.AioRpcError as exc:
         if exc.code() == StatusCode.UNAUTHENTICATED:

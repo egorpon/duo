@@ -1,27 +1,7 @@
 import { AuthService } from "@/features/auth/services/auth.service"
-import type { JWT } from "@/features/auth/types/token"
-import { useState } from "react"
+import { useApiCall } from "@/shared/hooks/useApiCall"
 
 export function useLogin() {
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string>("")
-
-    const login = async (
-        email: string,
-        password: string
-    ): Promise<JWT | null> => {
-        setError("")
-        setLoading(true)
-
-        const { result, error } = await AuthService.login(email, password)
-        setLoading(false)
-
-        if (error) {
-            setError(error)
-        }
-
-        return result
-    }
-
-    return { loading, login, error }
+    const { loading, error, call: login } = useApiCall(AuthService.login)
+    return { loading, error, login }
 }

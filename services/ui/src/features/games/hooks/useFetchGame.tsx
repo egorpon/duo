@@ -1,24 +1,7 @@
 import { GameService } from "@/features/games/services/game.service"
-import type { Game } from "@/features/games/types/game"
-import { useState } from "react"
+import { useApiCall } from "@/shared/hooks/useApiCall"
 
 export function useFetchGame() {
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string>("")
-
-    const fetch = async (id: number): Promise<Game | null> => {
-        setError("")
-        setLoading(true)
-
-        const { result, error } = await GameService.get(id)
-        setLoading(false)
-
-        if (error) {
-            setError(error)
-        }
-
-        return result
-    }
-
-    return { loading, fetch, error }
+    const { loading, error, call: fetch } = useApiCall(GameService.get)
+    return { loading, error, fetch }
 }

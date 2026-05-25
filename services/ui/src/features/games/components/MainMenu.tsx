@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { GameCard } from "@/features/games/components/GameCard"
 import { useCreateGame } from "@/features/games/hooks/useCreateGame"
 import type { GameType } from "@/features/games/types/game"
 import { useNavigate } from "react-router"
@@ -15,16 +15,15 @@ export function MainMenu() {
         }
         navigate(`/game/${game.id}`)
     }
+
     return (
-        <div>
-            Main Menu
-            <div>
-                <Button
-                    disabled={loading}
+        <div className="flex w-full items-start justify-center p-4 sm:justify-start sm:p-10">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <GameCard
+                    title="Tic Tac Toe"
+                    loading={loading}
                     onClick={() => handleCreateGame("tic_tac_toe")}
-                >
-                    Tic Tac Toe
-                </Button>
+                />
             </div>
         </div>
     )

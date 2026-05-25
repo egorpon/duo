@@ -40,7 +40,7 @@ export function PlayGamePage() {
     }
 
     return (
-        <div>
+        <div className="flex w-full items-start justify-center">
             {game.type === "tic_tac_toe" && (
                 <TicTacToe
                     gameState={gameState}

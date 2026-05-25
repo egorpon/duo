@@ -1,63 +1,29 @@
-const GRID_MARKS = [
-    { x: true },
-    { o: true },
-    {},
-    {},
-    { x: true },
-    { o: true },
-    { o: true },
-    {},
-    { x: true },
-] as const
+import { TicTacToeCell } from "@/features/games/components/tic-tac-toe/TicTacToeCell"
+
+const GRID_MARKS: ("x" | "o" | null)[] = [
+    "x",
+    "o",
+    null,
+    null,
+    "x",
+    "o",
+    "o",
+    null,
+    "x",
+]
 
 function MiniGrid() {
     return (
         <div className="relative mx-auto grid aspect-square w-48 grid-cols-3 grid-rows-3 gap-[3px] sm:w-36">
-            {GRID_MARKS.map((cell, i) => (
+            {GRID_MARKS.map((value, i) => (
                 <div
                     key={i}
                     className="flex items-center justify-center rounded-[3px] bg-white/5"
                 >
-                    {"x" in cell && (
-                        <svg
-                            viewBox="0 0 16 16"
-                            className="h-9 w-9 sm:h-7 sm:w-7"
-                        >
-                            <line
-                                x1="3"
-                                y1="3"
-                                x2="13"
-                                y2="13"
-                                stroke="oklch(0.696 0.17 162.48)"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                            />
-                            <line
-                                x1="13"
-                                y1="3"
-                                x2="3"
-                                y2="13"
-                                stroke="oklch(0.696 0.17 162.48)"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                    )}
-                    {"o" in cell && (
-                        <svg
-                            viewBox="0 0 16 16"
-                            className="h-9 w-9 sm:h-7 sm:w-7"
-                        >
-                            <circle
-                                cx="8"
-                                cy="8"
-                                r="4.5"
-                                fill="none"
-                                stroke="oklch(0.75 0.05 220)"
-                                strokeWidth="2.5"
-                            />
-                        </svg>
-                    )}
+                    <TicTacToeCell
+                        value={value}
+                        className="h-9 w-9 stroke-[3] sm:h-7 sm:w-7"
+                    />
                 </div>
             ))}
             <div className="pointer-events-none absolute inset-0 rounded-sm ring-1 ring-white/10" />

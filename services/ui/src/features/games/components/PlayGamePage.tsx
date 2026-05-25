@@ -1,4 +1,5 @@
 import { TicTacToe } from "@/features/games/components/tic-tac-toe/TicTacToe"
+import { WaitingForOpponent } from "@/features/games/components/WaitingForOpponent"
 import { useFetchGame } from "@/features/games/hooks/useFetchGame"
 import { useGameWebSocket } from "@/features/games/hooks/useGameWebSocket"
 import useAuthStore from "@/features/auth/stores/auth"
@@ -31,13 +32,7 @@ export function PlayGamePage() {
 
     if (loading) return <PageLoading />
     if (!game) return null
-    if (!gameState) {
-        return (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-                Waiting for opponent...
-            </div>
-        )
-    }
+    if (!gameState) return <WaitingForOpponent />
 
     return (
         <div className="flex w-full items-start justify-center">
